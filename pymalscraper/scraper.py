@@ -51,11 +51,14 @@ class MALScraper:
             Returns the anime url link.
         """
         url = self.MAL_URL + anime
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
+        }
 
-        res = requests.get(url)
+        res = requests.get(url, headers=headers)
         while res.status_code != 200:
             time.sleep(1)
-            res = requests.get(url)
+            res = requests.get(url, headers=headers)
 
         soup = BeautifulSoup(res.text, features='lxml')
         lnk = None
