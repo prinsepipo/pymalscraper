@@ -11,8 +11,8 @@ These are, as for now, the only available data.
 - Anime Type
 - Episodes
 - Genres
-- Poster
-- Trailer
+- Poster (link)
+- Trailer (link)
 
 ## Installation
 ```
@@ -23,27 +23,27 @@ pip install pymalscraper
 ```python
 from pymalscraper.scraper import MALScraper
 scraper = MALScraper()
-data = scraper.get_anime("kimi no na wa.")
+anime = scraper.get_anime("kimi no na wa.")
 
-> data.title
+> anime.title
 'Kimi no na wa.'
-> data.english_title
+> anime.english_title
 'Your Name.'
-> data.japanese_title
+> anime.japanese_title
 '君の名は。'
-> data.synonyms
+> anime.synonyms
 ''
-> data.synopsis
+> anime.synopsis
 "Mitsuha Miyamizu, a high school girl, yearns to live the life of a boy in the bustling city of Tokyo—a dream that stands in stark contrast..."
-> data.animetype
+> anime.animetype
 'Movie'
-> data.episodes
+> anime.episodes
 '1'
-> data.genres
+> anime.genres
 'Romance, Supernatural, School, Drama'
-> data.poster
+> anime.poster
 'https://cdn.myanimelist.net/images/anime/5/87048.jpg'
-> data.trailer
+> anime.trailer
 'https://www.youtube.com/embed/3KR8_igDs1Y?enablejsapi=1&wmode=opaque&autoplay=1'
 
 # To get the anime url    
