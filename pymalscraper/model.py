@@ -13,14 +13,14 @@ class Anime:
             time.sleep(1)
             res = requests.get(url, headers=headers)
 
-        self.soup = BeautifulSoup(res.text, features='lxml')
+        self._soup = BeautifulSoup(res.text, features='lxml')
 
     @property
     def title(self):
         title = None
 
         try:
-            span = self.soup.find('span', {'itemprop': 'name'})
+            span = self._soup.find('span', {'itemprop': 'name'})
             title = span.text
         except Exception as e:
             print(f'Error getting title.\nError: {e}')
@@ -32,7 +32,7 @@ class Anime:
         english_title = None
 
         try:
-            divs = self.soup.find_all('div', {'class': 'spaceit_pad'})
+            divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'English:' in div.text:
@@ -49,7 +49,7 @@ class Anime:
         japanese_title = None
 
         try:
-            divs = self.soup.find_all('div', {'class': 'spaceit_pad'})
+            divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'Japanese:' in div.text:
@@ -66,7 +66,7 @@ class Anime:
         synonyms = None
 
         try:
-            divs = self.soup.find_all('div', {'class': 'spaceit_pad'})
+            divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'Synonyms:' in div.text:
@@ -83,7 +83,7 @@ class Anime:
         synopsis = None
 
         try:
-            span = self.soup.find('span', {'itemprop': 'description'})
+            span = self._soup.find('span', {'itemprop': 'description'})
             synopsis = span.text
         except Exception as e:
             print(f'Error getting synopsis.\nError: {e}')
@@ -95,7 +95,7 @@ class Anime:
         mtype = None
 
         try:
-            divs = self.soup.find(
+            divs = self._soup.find(
                 'div', {'class': 'js-scrollfix-bottom'}).find_all('div')
 
             for div in divs:
@@ -112,7 +112,7 @@ class Anime:
         eps = None
 
         try:
-            divs = self.soup.find(
+            divs = self._soup.find(
                 'div', {'class': 'js-scrollfix-bottom'}).find_all('div', {'class': 'spaceit'})
 
             for div in divs:
@@ -129,7 +129,7 @@ class Anime:
         genres = None
 
         try:
-            divs = self.soup.find(
+            divs = self._soup.find(
                 'div', {'class': 'js-scrollfix-bottom'}).find_all('div')
 
             for div in divs:
@@ -146,7 +146,7 @@ class Anime:
         poster = None
 
         try:
-            img = self.soup.find('img', {'class': 'ac'})
+            img = self._soup.find('img', {'class': 'ac'})
             poster = img['src']
         except Exception as e:
             print(f'Error getting poster.\nError: {e}')
@@ -158,7 +158,7 @@ class Anime:
         trailer = None
 
         try:
-            a = self.soup.find(
+            a = self._soup.find(
                 'a', {'class': 'iframe js-fancybox-video video-unit promotion'})
             trailer = a['href']
         except Exception as e:
