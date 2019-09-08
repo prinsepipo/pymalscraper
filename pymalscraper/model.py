@@ -2,6 +2,8 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+from .helpers import checked_data_length
+
 
 class Anime:
     def __init__(self, url):
@@ -25,7 +27,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting title.\nError: {e}')
 
-        return title
+        return checked_data_length(title, 100)
 
     @property
     def english_title(self):
@@ -42,7 +44,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting english title.\nError: {e}')
 
-        return english_title
+        return checked_data_length(english_title, 150)
 
     @property
     def japanese_title(self):
@@ -59,7 +61,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting japanese title.\nError: {e}')
 
-        return japanese_title
+        return checked_data_length(japanese_title, 150)
 
     @property
     def synonyms(self):
@@ -76,7 +78,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting synonyms.\nError: {e}')
 
-        return synonyms
+        return checked_data_length(synonyms, 200)
 
     @property
     def synopsis(self):
@@ -92,7 +94,7 @@ class Anime:
 
     @property
     def animetype(self):
-        mtype = None
+        atype = None
 
         try:
             divs = self._soup.find(
@@ -100,12 +102,12 @@ class Anime:
 
             for div in divs:
                 if 'Type:' in div.text:
-                    mtype = div.text.replace('Type:', '').rstrip().lstrip()
+                    atype = div.text.replace('Type:', '').rstrip().lstrip()
                     break
         except Exception as e:
             print(f'Error getting type.\nError: {e}')
 
-        return mtype
+        return checked_data_length(atype, 10)
 
     @property
     def episodes(self):
@@ -122,7 +124,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting episodes.\nError: {e}')
 
-        return eps
+        return checked_data_length(eps, 5)
 
     @property
     def genres(self):
@@ -139,7 +141,7 @@ class Anime:
         except Exception as e:
             print(f'Error getting genres.\nError: {e}')
 
-        return genres
+        return checked_data_length(genres, 400)
 
     @property
     def poster(self):
@@ -165,3 +167,26 @@ class Anime:
             print(f'Error getting trailer.\nError: {e}')
 
         return trailer
+
+    def get_data(self, format='json'):
+        '''Gets the full data of the anime in specified format.'''
+
+        data = None
+
+        if format == 'json':
+            data = {
+                'title': self.title,
+                'english_title': self.english_title,
+                'japanese_title': self.japanese_title,
+                'synonyms': self.synonyms,
+                'synopsis': self.synopsis,
+                'type': self.animetype,
+                'episodes': self.episodes,
+                'genres': self.genres,
+                'poster': self.poster,
+                'trailer': self.trailer
+            }
+        else:
+            raise ValueError('Parameter format is invalid.')
+
+        return data
