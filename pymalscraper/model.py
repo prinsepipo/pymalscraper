@@ -187,6 +187,6 @@ class Anime:
                 'trailer': self.trailer
             }
         else:
-            raise ValueError('Parameter format is invalid.')
+            raise ValueError('Value of parameter format is invalid.')
 
         return data
