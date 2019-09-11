@@ -71,9 +71,27 @@ class MALScraper:
             print(f'Error getting anime url.\nError: {e}')
         return lnk
 
-    def get_all_anime(self):
-        total_anime = 16100
-        count = 0
+    def get_all_anime(self, start=0, to=16100):
+        """Gets all the anime from the website. Each anime has kind of index based pointer.
+
+        Parameters
+        ----------
+        start : int
+            Start point of the anime. Starts at 0.
+        to : int
+            End point of the anime. Ends at 16100.
+
+        Returns
+        -------
+        str
+            Returns the anime url link.
+        """
+        if to % 50 != 0 or to > 16100:
+            raise ValueError(
+                'Value of parameter to must be divisible by 50, or less than or equal to 16100.')
+
+        total_anime = to
+        count = start
         url = 'https://myanimelist.net/topanime.php?limit={count}'
         links = []
 
