@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 
 import time
 import sys
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
+from multiprocessing import cpu_count
 
 
 class MALScraper:
@@ -59,6 +60,7 @@ class MALScraper:
 
         res = requests.get(url, headers=self.headers)
         while res.status_code != 200:
+            print(res.status_code)
             time.sleep(1)
             res = requests.get(url, headers=self.headers)
 
@@ -71,7 +73,7 @@ class MALScraper:
             print(f'Error getting anime url.\nError: {e}')
         return lnk
 
-    def get_all_anime(self, start=0, to=16100):
+    def get_all_anime(self, start=0, to=16150):
         """Gets all the anime from the website. Each anime has kind of index based pointer.
 
         Parameters
@@ -86,16 +88,17 @@ class MALScraper:
         str
             Returns the anime url link.
         """
-        if to % 50 != 0 or to > 16100:
+        if to % 50 != 0 or to > 16150:
             raise ValueError(
                 'Value of parameter to must be divisible by 50, or less than or equal to 16100.')
 
-        total_anime = to
+        total_anime = to - 50
         count = start
-        url = 'https://myanimelist.net/topanime.php?limit={count}'
         links = []
 
         while count <= total_anime:
+            url = f'https://myanimelist.net/topanime.php?limit={count}'
+            print(f'Parsing {url} ...')
             res = requests.get(url, headers=self.headers)
 
             while res.status_code != 200:
@@ -113,16 +116,12 @@ class MALScraper:
 
                     if link:
                         links.append(link)
-                        print(f'Link count: {len(links)}')
             except Exception as e:
                 print(e)
 
             count += 50
 
-        sys.setrecursionlimit(25000)
-        p = Pool(10)
-        animes = p.map(Anime, links)
-        p.terminate()
-        p.join()
+        with ThreadPool(cpu_count()) as p:
+            animes = p.map(Anime, links)
 
         return animes
