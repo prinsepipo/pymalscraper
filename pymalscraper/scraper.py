@@ -1,4 +1,4 @@
-from .model import Anime
+from .model import Anime, Character
 
 import requests
 from bs4 import BeautifulSoup
@@ -19,7 +19,7 @@ class MALScraper:
 
     def __init__(self):
         # MAL search url
-        self.MAL_URL = 'https://myanimelist.net/anime.php?q='
+        self.MAL_ANIME_URL = 'https://myanimelist.net/anime.php?q='
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
@@ -56,7 +56,7 @@ class MALScraper:
         str
             Returns the anime url link.
         """
-        url = self.MAL_URL + anime
+        url = self.MAL_ANIME_URL + anime
 
         res = requests.get(url, headers=self.headers)
         while res.status_code != 200:
@@ -123,5 +123,44 @@ class MALScraper:
 
         with ThreadPool(cpu_count()) as p:
             animes = p.map(Anime, links)
+
+        return animes
+
+    def get_all_characters(self, start=0, to=10000):
+        if to % 50 != 0 or to > 16150:
+            raise ValueError(
+                'Value of parameter to must be divisible by 50, or less than or equal to 16100.')
+
+        total_anime = to - 50
+        count = start
+        links = []
+
+        while count <= total_anime:
+            url = f'https://myanimelist.net/character.php?limit={count}'
+            print(f'Parsing {url} ...')
+            res = requests.get(url, headers=self.headers)
+
+            while res.status_code != 200:
+                time.sleep(1)
+                res = requests.get(url, headers=self.headers)
+
+            soup = BeautifulSoup(res.text, features='lxml')
+
+            try:
+                aa = soup.find('div', {'id': 'content'}).find_all(
+                    'a', {'class': 'fs14 fw-b'})
+
+                for a in aa:
+                    link = a['href']
+
+                    if link:
+                        links.append(link)
+            except Exception as e:
+                print(e)
+
+            count += 50
+
+        with ThreadPool(cpu_count()) as p:
+            animes = p.map(Character, links)
 
         return animes

@@ -190,3 +190,50 @@ class Anime:
             raise ValueError('Value of parameter format is invalid.')
 
         return data
+
+
+class Character:
+    def __init__(self, url):
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
+        }
+        res = requests.get(url, headers=self.headers)
+        while res.status_code != 200:
+            time.sleep(1)
+            res = requests.get(url, headers=self.headers)
+
+        self._soup = BeautifulSoup(res.text, features='lxml')
+        self._url = url
+
+    @property
+    def name(self):
+        name = None
+
+        try:
+            div = self._soup.find('div', {'id': 'content'}).find(
+                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('div', {'class': 'normal_header'})
+            name = div.text
+        except Exception as e:
+            print(f'Error at name. Error: {e}')
+
+        return name
+
+    @property
+    def poster(self):
+        poster = None
+
+        try:
+            img = self._soup.find('div', {'id': 'content'}).find('img')
+            poster = img['src']
+        except Exception as e:
+            print(f'Error at posters. Error: {e}')
+
+        return poster
+
+    def get_gallery(self):
+        url = self._url + '/pictures'
+        res = requests.get(url, headers=self.headers)
+        soup = BeautifulSoup(res.text, features='lxml')
+        imgs = soup.find('div', {'id': 'content'}).find(
+            'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('table').find_all('img')
+        return [img['src'] for img in imgs]
