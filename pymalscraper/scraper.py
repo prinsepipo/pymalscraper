@@ -4,7 +4,6 @@ import requests
 from bs4 import BeautifulSoup
 
 import time
-import sys
 from multiprocessing.pool import ThreadPool
 from multiprocessing import cpu_count
 
@@ -20,6 +19,7 @@ class MALScraper:
     def __init__(self):
         # MAL search url
         self.MAL_ANIME_URL = 'https://myanimelist.net/anime.php?q='
+        self.MAL_CHAR_URL = 'https://myanimelist.net/character.php?q='
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
@@ -125,6 +125,62 @@ class MALScraper:
             animes = p.map(Anime, links)
 
         return animes
+
+    def get_character(self, name):
+        """Gets the character model data.
+
+        Parameters
+        ----------
+        name : str or int
+            Name of the character.
+
+        Returns
+        -------
+        class Character
+            Returns the scraped character model data.
+        """
+
+        # Gets the character url.
+        char_url = self.get_character_url(name)
+
+        if char_url is None:
+            print(f'{name} not found.')
+            return None
+
+        return Character(char_url)
+
+    def get_character_url(self, name):
+        """Gets the url of the character from the website.
+
+        Parameters
+        ----------
+        name : str or int
+            Name of the character.
+
+        Returns
+        -------
+        str
+            Returns the character url link.
+        """
+        url = self.MAL_CHAR_URL + str(name)
+
+        res = requests.get(url, headers=self.headers)
+        while res.status_code != 200:
+            print(res.status_code)
+            time.sleep(1)
+            res = requests.get(url, headers=self.headers)
+
+        soup = BeautifulSoup(res.text, features='lxml')
+        lnk = None
+
+        try:
+            a = soup.find('div', {'id': 'content'}).find('table', {
+                'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}).find('td', {'width': '175'}).find('a')
+            lnk = a['href']
+        except Exception as e:
+            print(f'Error getting character url.\nError: {e}')
+
+        return lnk
 
     def get_all_characters(self, start=0, to=10000):
         if to % 50 != 0 or to > 16150:
