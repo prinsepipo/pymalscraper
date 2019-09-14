@@ -102,6 +102,7 @@ class MALScraper:
             res = requests.get(url, headers=self.headers)
 
             while res.status_code != 200:
+                print(res.status_code)
                 time.sleep(1)
                 res = requests.get(url, headers=self.headers)
 
@@ -120,6 +121,8 @@ class MALScraper:
                 print(e)
 
             count += 50
+
+        print(f'Scraping animes total of {len(links)}')
 
         with ThreadPool(cpu_count()) as p:
             animes = p.map(Anime, links)
@@ -217,6 +220,6 @@ class MALScraper:
             count += 50
 
         with ThreadPool(cpu_count()) as p:
-            animes = p.map(Character, links)
+            chars = p.map(Character, links)
 
-        return animes
+        return chars
