@@ -59,10 +59,12 @@ class MALScraper:
         url = self.MAL_ANIME_URL + anime
 
         res = requests.get(url, headers=self.headers)
-        while res.status_code != 200:
+        req_count = 0
+        while res.status_code != 200 and req_count <= 10:
             print(res.status_code)
             time.sleep(1)
             res = requests.get(url, headers=self.headers)
+            req_count += 1
 
         soup = BeautifulSoup(res.text, features='lxml')
         lnk = None
@@ -168,10 +170,12 @@ class MALScraper:
         url = self.MAL_CHAR_URL + str(name)
 
         res = requests.get(url, headers=self.headers)
-        while res.status_code != 200:
+        req_count = 0
+        while res.status_code != 200 and req_count <= 10:
             print(res.status_code)
             time.sleep(1)
             res = requests.get(url, headers=self.headers)
+            req_count += 1
 
         soup = BeautifulSoup(res.text, features='lxml')
         lnk = None
@@ -197,11 +201,13 @@ class MALScraper:
         while count <= total_anime:
             url = f'https://myanimelist.net/character.php?limit={count}'
             print(f'Parsing {url} ...')
-            res = requests.get(url, headers=self.headers)
 
-            while res.status_code != 200:
+            res = requests.get(url, headers=self.headers)
+            req_count = 0
+            while res.status_code != 200 and req_count <= 10:
                 time.sleep(1)
                 res = requests.get(url, headers=self.headers)
+                req_count += 1
 
             soup = BeautifulSoup(res.text, features='lxml')
 

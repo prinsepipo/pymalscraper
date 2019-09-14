@@ -7,6 +7,7 @@ from .helpers import checked_data_length
 
 class Anime:
     def __init__(self, url):
+        print(f'Scraping {url}')
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
@@ -16,7 +17,7 @@ class Anime:
             res = requests.get(url, headers=headers)
 
         self._soup = BeautifulSoup(res.text, features='lxml')
-        print(f'Scraping {url} done.')
+        print(f'Done.')
 
     @property
     def title(self):
@@ -195,6 +196,7 @@ class Anime:
 
 class Character:
     def __init__(self, url):
+        print(f'Scraping {url}')
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
@@ -205,6 +207,7 @@ class Character:
 
         self._soup = BeautifulSoup(res.text, features='lxml')
         self._url = url
+        print('Done.')
 
     @property
     def name(self):
