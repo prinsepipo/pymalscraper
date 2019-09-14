@@ -16,6 +16,7 @@ class Anime:
             res = requests.get(url, headers=headers)
 
         self._soup = BeautifulSoup(res.text, features='lxml')
+        print(f'Scraping {url} done.')
 
     @property
     def title(self):
