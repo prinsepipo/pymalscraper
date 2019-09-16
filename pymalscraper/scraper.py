@@ -1,4 +1,4 @@
-from .model import Anime, Character
+from .models import Anime, Character
 
 import requests
 from bs4 import BeautifulSoup
