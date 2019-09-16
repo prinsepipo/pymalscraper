@@ -9,14 +9,17 @@ from multiprocessing import cpu_count
 
 
 class MALScraper:
-    """Scrapes https://myanimelist.net/ using BeautifulSoup4.
+    """
+    Scrape https://myanimelist.net/.
 
-    Methods
-    -------
-    get_anime(anime), get_anime_url(anime)
+    Methods:
+        get_anime(anime), get_anime_url(anime)
     """
 
     def __init__(self):
+        """
+        Initialize the settings of the scraper.
+        """
         # MAL search url
         self.MAL_ANIME_URL = 'https://myanimelist.net/anime.php?q='
         self.MAL_CHAR_URL = 'https://myanimelist.net/character.php?q='
@@ -25,18 +28,20 @@ class MALScraper:
         }
 
     def get_anime(self, anime):
-        """Gets the anime model data.
-
-        Parameters
-        ----------
-        anime : str
-            Name of the anime.
-
-        Returns
-        -------
-        class Anime
-            Returns the scraped anime model data.
         """
+        Get the anime model data.
+
+        Args:
+            anime: The name of the anime.
+
+        Returns:
+            Return the Anime model data.
+
+        Raises:
+            TypeError: Argument anime must be string.
+        """
+        if type(anime) != str:
+            raise TypeError('Argument anime must be string.')
 
         # Gets the anime url.
         anime_url = self.get_anime_url(anime)
@@ -46,15 +51,11 @@ class MALScraper:
     def get_anime_url(self, anime):
         """Gets the url of the anime from the website.
 
-        Parameters
-        ----------
-        anime : str
-            Name of the anime.
+        Args:
+            anime: Name of the anime.
 
-        Returns
-        -------
-        str
-            Returns the anime url link.
+        Returns:
+            Return the scraped anime url.
         """
         url = self.MAL_ANIME_URL + anime
 
@@ -75,26 +76,29 @@ class MALScraper:
             print(f'Error getting anime url.\nError: {e}')
         return lnk
 
-    def get_all_anime(self, start=0, to=16150):
-        """Gets all the anime from the website. Each anime has kind of index based pointer.
-
-        Parameters
-        ----------
-        start : int
-            Start point of the anime. Starts at 0.
-        to : int
-            End point of the anime. Ends at 16100.
-
-        Returns
-        -------
-        str
-            Returns the anime url link.
+    def get_all_anime(self, start=0, end=16150):
         """
-        if to % 50 != 0 or to > 16150:
-            raise ValueError(
-                'Value of parameter to must be divisible by 50, or less than or equal to 16100.')
+        Scrape all the anime from the website. Scrapes 50 anime each method call.
 
-        total_anime = to - 50
+        Args:
+            start: Where to begin scraping.
+            to: Where to end scraping.
+
+        Returns:
+            Return a list of Anime model data.
+
+        Raises:
+            ValueError: Argument start must be greater than or equal to 0, or less than or equal to 16150.
+            ValueError: Argument end must be divisible by 50, or less than or equal to 16100.
+        """
+        if start < 0 or start > 16150:
+            raise ValueError(
+                'Argument start must be greater than or equal to 0, or less than or equal to 16150.')
+        if end % 50 != 0 or end > 16150:
+            raise ValueError(
+                'Argument end must be divisible by 50, or less than or equal to 16100.')
+
+        total_anime = end - 50
         count = start
         links = []
 
@@ -132,18 +136,20 @@ class MALScraper:
         return animes
 
     def get_character(self, name):
-        """Gets the character model data.
-
-        Parameters
-        ----------
-        name : str or int
-            Name of the character.
-
-        Returns
-        -------
-        class Character
-            Returns the scraped character model data.
         """
+        Gets the character model data.
+
+        Args:
+            name: Name of the character.
+
+        Returns:
+            Return the Character model data.
+
+        Raises:
+            TypeError: Argument name must be string.
+        """
+        if type(name) != str:
+            raise TypeError('Argument name must be string.')
 
         # Gets the character url.
         char_url = self.get_character_url(name)
@@ -155,17 +161,14 @@ class MALScraper:
         return Character(char_url)
 
     def get_character_url(self, name):
-        """Gets the url of the character from the website.
+        """
+        Gets the url of the character from the website.
 
-        Parameters
-        ----------
-        name : str or int
-            Name of the character.
+        Args:
+            name: Name of the character.
 
-        Returns
-        -------
-        str
-            Returns the character url link.
+        Returns:
+            Returns the scraped character url.
         """
         url = self.MAL_CHAR_URL + str(name)
 
@@ -189,12 +192,29 @@ class MALScraper:
 
         return lnk
 
-    def get_all_characters(self, start=0, to=10000):
-        if to % 50 != 0 or to > 16150:
-            raise ValueError(
-                'Value of parameter to must be divisible by 50, or less than or equal to 16100.')
+    def get_all_characters(self, start=0, end=10000):
+        """
+        Scrape all the character from the website. Scrapes 50 character each method call.
 
-        total_anime = to - 50
+        Args:
+            start: Where to begin scraping.
+            end: Where to end scraping.
+
+        Returns:
+            Return a list of Character model data.
+
+        Raises:
+            ValueError: Argument start must be greater than or equal to 0, or less than or equal to 16150.
+            ValueError: Argument end must be divisible by 50, or less than or equal to 16100.
+        """
+        if start < 0 or start > 10000:
+            raise ValueError(
+                'Argument start must be greater than or equal to 0, or less than or equal to 16150.')
+        if end % 50 != 0 or end > 10000:
+            raise ValueError(
+                'Argument end must be divisible by 50, or less than or equal to 16100.')
+
+        total_anime = end - 50
         count = start
         links = []
 
