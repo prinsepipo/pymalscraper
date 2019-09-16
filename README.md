@@ -2,7 +2,6 @@
 Scrapes anime data from https://myanimelist.net/ .
 
 ## Anime Model Data
-These are, as for now, the only available data.
 - Title
 - English Title
 - Japanese Title
@@ -11,8 +10,13 @@ These are, as for now, the only available data.
 - Anime Type
 - Episodes
 - Genres
-- Poster (link)
-- Trailer (link)
+- Poster
+- Trailer
+
+## Character Model Data
+- Name
+- Poster
+- Gallery
 
 ## Installation
 ```
@@ -23,6 +27,8 @@ pip install pymalscraper
 ```python
 from pymalscraper.scraper import MALScraper
 scraper = MALScraper()
+
+# Scraping Anime
 anime = scraper.get_anime("kimi no na wa.")
 
 > anime.title
@@ -53,4 +59,15 @@ anime = scraper.get_anime("kimi no na wa.")
 # To get the anime url    
 > scraper.get_anime_url('kimi no na wa.')
 'https://myanimelist.net/anime/32281/Kimi_no_Na_wa'
+
+
+# Scraping Character
+char = scraper.get_character('mitsuha')
+
+> char.name
+'Mitsuha  (蜜羽)'
+> char.poster
+'https://cdn.myanimelist.net/images/characters/13/126193.jpg'
+> char.get_gallery()
+['https://cdn.myanimelist.net/images/characters/13/126191.jpg', 'https://cdn.myanimelist.net/images/characters/13/126193.jpg']
 ```
