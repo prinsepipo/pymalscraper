@@ -193,6 +193,9 @@ class Anime:
 
         return data
 
+    def __repr__(self):
+        return f'<models.Anime \'{self.title}\'>'
+
 
 class Character:
     def __init__(self, url):
@@ -241,3 +244,6 @@ class Character:
         imgs = soup.find('div', {'id': 'content'}).find(
             'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('table').find_all('img')
         return [img['src'] for img in imgs]
+
+    def __repr__(self):
+        return f'<models.Character \'{self.name}\'>'
