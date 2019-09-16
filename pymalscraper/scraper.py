@@ -4,8 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 import time
-from multiprocessing.pool import ThreadPool
-from multiprocessing import cpu_count
+from concurrent.futures import ThreadPoolExecutor
 
 
 class MALScraper:
@@ -130,10 +129,10 @@ class MALScraper:
 
         print(f'Scraping animes total of {len(links)}')
 
-        with ThreadPool(cpu_count()) as p:
-            animes = p.map(Anime, links)
+        with ThreadPoolExecutor() as executor:
+            animes = executor.map(Anime, links)
 
-        return animes
+        return list(animes)
 
     def get_character(self, name):
         """
@@ -245,7 +244,7 @@ class MALScraper:
 
             count += 50
 
-        with ThreadPool(cpu_count()) as p:
-            chars = p.map(Character, links)
+        with ThreadPoolExecutor() as executor:
+            chars = executor.map(Character, links)
 
-        return chars
+        return list(chars)
