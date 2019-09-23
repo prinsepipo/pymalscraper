@@ -3,6 +3,7 @@
 
 # code editor
 .vscode
+.idea
 
 # Compiled python modules.
 *.pyc
