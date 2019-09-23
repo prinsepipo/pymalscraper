@@ -2,8 +2,6 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-from .helpers import checked_data_length
-
 
 class Anime:
     def __init__(self, url):
@@ -21,7 +19,7 @@ class Anime:
 
     @property
     def title(self):
-        title = None
+        title = ''
 
         try:
             span = self._soup.find('span', {'itemprop': 'name'})
@@ -29,62 +27,60 @@ class Anime:
         except Exception as e:
             print(f'Error getting title.\nError: {e}')
 
-        return checked_data_length(title, 100)
+        return title
 
     @property
     def english_title(self):
-        english_title = None
+        title = ''
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'English:' in div.text:
-                    english_title = div.text.replace(
-                        'English:', '').rstrip().lstrip()
+                    title = div.text.replace('English:', '').rstrip().lstrip()
                     break
         except Exception as e:
             print(f'Error getting english title.\nError: {e}')
 
-        return checked_data_length(english_title, 150)
+        return title
 
     @property
     def japanese_title(self):
-        japanese_title = None
+        title = ''
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'Japanese:' in div.text:
-                    japanese_title = div.text.replace(
-                        'Japanese:', '').rstrip().lstrip()
+                    title = div.text.replace('Japanese:', '').rstrip().lstrip()
                     break
         except Exception as e:
             print(f'Error getting japanese title.\nError: {e}')
 
-        return checked_data_length(japanese_title, 150)
+        return title
 
     @property
     def synonyms(self):
-        synonyms = None
+        syn = ''
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
 
             for div in divs:
                 if 'Synonyms:' in div.text:
-                    synonyms = div.text.replace(
+                    syn = div.text.replace(
                         'Synonyms:', '').rstrip().lstrip()
                     break
         except Exception as e:
             print(f'Error getting synonyms.\nError: {e}')
 
-        return checked_data_length(synonyms, 200)
+        return syn
 
     @property
     def synopsis(self):
-        synopsis = None
+        synopsis = ''
 
         try:
             span = self._soup.find('span', {'itemprop': 'description'})
@@ -96,7 +92,7 @@ class Anime:
 
     @property
     def animetype(self):
-        atype = None
+        atype = ''
 
         try:
             divs = self._soup.find(
@@ -109,11 +105,11 @@ class Anime:
         except Exception as e:
             print(f'Error getting type.\nError: {e}')
 
-        return checked_data_length(atype, 10)
+        return atype
 
     @property
     def episodes(self):
-        eps = None
+        eps = ''
 
         try:
             divs = self._soup.find(
@@ -126,11 +122,11 @@ class Anime:
         except Exception as e:
             print(f'Error getting episodes.\nError: {e}')
 
-        return checked_data_length(eps, 5)
+        return eps
 
     @property
     def genres(self):
-        genres = None
+        genres = ''
 
         try:
             divs = self._soup.find(
@@ -143,11 +139,11 @@ class Anime:
         except Exception as e:
             print(f'Error getting genres.\nError: {e}')
 
-        return checked_data_length(genres, 400)
+        return genres
 
     @property
     def poster(self):
-        poster = None
+        poster = ''
 
         try:
             img = self._soup.find('img', {'class': 'ac'})
@@ -159,7 +155,7 @@ class Anime:
 
     @property
     def trailer(self):
-        trailer = None
+        trailer = ''
 
         try:
             a = self._soup.find(
@@ -170,31 +166,31 @@ class Anime:
 
         return trailer
 
-    def get_data(self, format='json'):
-        '''Gets the full data of the anime in specified format.'''
+    def get_data(self):
+        """
+        Gets the full anime data in json.
 
-        data = None
-
-        if format == 'json':
-            data = {
-                'title': self.title,
-                'english_title': self.english_title,
-                'japanese_title': self.japanese_title,
-                'synonyms': self.synonyms,
-                'synopsis': self.synopsis,
-                'type': self.animetype,
-                'episodes': self.episodes,
-                'genres': self.genres,
-                'poster': self.poster,
-                'trailer': self.trailer
-            }
-        else:
-            raise ValueError('Value of parameter format is invalid.')
+        Returns:
+            Dict object.
+        """
+        data = {
+            'title': self.title,
+            'english_title': self.english_title,
+            'japanese_title': self.japanese_title,
+            'synonyms': self.synonyms,
+            'synopsis': self.synopsis,
+            'type': self.animetype,
+            'episodes': self.episodes,
+            'genres': self.genres,
+            'poster': self.poster,
+            'trailer': self.trailer
+        }
 
         return data
 
-    def __repr__(self):
-        return f'<models.Anime \'{self.title}\'>'
+
+def __repr__(self):
+    return f'<models.Anime \'{self.title}\'>'
 
 
 class Character:
