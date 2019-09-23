@@ -7,7 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 
-class MALScraper:
+class Scraper:
     """
     Scrape https://myanimelist.net/.
 
@@ -17,7 +17,7 @@ class MALScraper:
 
     def __init__(self):
         """
-        Initialize the settings of the scraper.
+        Initialize the scraper.
         """
         # MAL search url
         self.MAL_ANIME_URL = 'https://myanimelist.net/anime.php?q='
@@ -184,7 +184,8 @@ class MALScraper:
 
         try:
             a = soup.find('div', {'id': 'content'}).find('table', {
-                'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}).find('td', {'width': '175'}).find('a')
+                'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}).find(
+                'td', {'width': '175'}).find('a')
             lnk = a['href']
         except Exception as e:
             print(f'Error getting character url.\nError: {e}')
