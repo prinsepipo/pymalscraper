@@ -1,7 +1,9 @@
 # Anime Web Scraper
-Scrapes anime data from https://myanimelist.net/ .
 
-## Anime Model Data
+Scrapes data from https://myanimelist.net/ .
+
+## Anime Model
+
 - Title
 - English Title
 - Japanese Title
@@ -13,17 +15,20 @@ Scrapes anime data from https://myanimelist.net/ .
 - Poster
 - Trailer
 
-## Character Model Data
+## Character Model
+
 - Name
 - Poster
 - Gallery
 
 ## Installation
+
 ```
 pip install pymalscraper
 ```
 
 ## Basic Usage
+
 ```python
 from pymalscraper.scraper import MALScraper
 scraper = MALScraper()
