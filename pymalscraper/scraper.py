@@ -10,10 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 class Scraper:
     """
-    Scrape https://myanimelist.net/.
-
-    Methods:
-        get_anime(anime), get_anime_url(anime)
+    Scrape data from https://myanimelist.net/.
     """
 
     def __init__(self):
@@ -30,7 +27,7 @@ class Scraper:
     def search_anime(self, name):
         """
         Args:
-            anime: Name of anime.
+            name: Name of anime.
 
         Returns:
             Return a list of tuple that contains the nane and url of the anime.
@@ -83,10 +80,11 @@ class Scraper:
     def get_all_anime(self, start=0, end=16150):
         """
         Scrape all the anime from the website. Scrapes 50 anime each method call.
+        Note: Stoping the process will result to loss of data.
 
         Args:
             start: Where to begin scraping.
-            to: Where to end scraping.
+            end: Where to end scraping.
 
         Returns:
             Return a list of Anime model data.
@@ -108,14 +106,7 @@ class Scraper:
 
         while count <= total_anime:
             url = f'https://myanimelist.net/topanime.php?limit={count}'
-            print(f'Parsing {url} ...')
-            res = requests.get(url, headers=self.headers)
-
-            while res.status_code != 200:
-                print(res.status_code)
-                time.sleep(1)
-                res = requests.get(url, headers=self.headers)
-
+            res = get(url, headers=self.headers)
             soup = BeautifulSoup(res.text, features='lxml')
 
             try:
@@ -148,15 +139,9 @@ class Scraper:
 
         Returns:
             Return the Character model data.
-
-        Raises:
-            TypeError: Argument name must be string.
         """
-        if type(name) != str:
-            raise TypeError('Argument name must be string.')
-
         # Gets the character url.
-        char_url = self.get_character_url(name)
+        char_url = self.get_character_url(str(name))
 
         if char_url is None:
             print(f'{name} not found.')
@@ -175,22 +160,16 @@ class Scraper:
             Returns the scraped character url.
         """
         url = self.MAL_CHAR_URL + str(name)
-
-        res = requests.get(url, headers=self.headers)
-        req_count = 0
-        while res.status_code != 200 and req_count <= 10:
-            print(res.status_code)
-            time.sleep(1)
-            res = requests.get(url, headers=self.headers)
-            req_count += 1
-
+        res = get(url, headers=self.headers)
         soup = BeautifulSoup(res.text, features='lxml')
         lnk = None
 
         try:
-            a = soup.find('div', {'id': 'content'}).find('table', {
-                'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}).find(
-                'td', {'width': '175'}).find('a')
+            a = soup.find('div', {'id': 'content'})
+            table = a.find('table',
+                           {'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'})
+            td = table.find('td', {'width': '175'})
+            a = td.find('a')
             lnk = a['href']
         except Exception as e:
             print(f'Error getting character url.\nError: {e}')
@@ -225,15 +204,7 @@ class Scraper:
 
         while count <= total_anime:
             url = f'https://myanimelist.net/character.php?limit={count}'
-            print(f'Parsing {url} ...')
-
-            res = requests.get(url, headers=self.headers)
-            req_count = 0
-            while res.status_code != 200 and req_count <= 10:
-                time.sleep(1)
-                res = requests.get(url, headers=self.headers)
-                req_count += 1
-
+            res = get(url, headers=self.headers)
             soup = BeautifulSoup(res.text, features='lxml')
 
             try:
