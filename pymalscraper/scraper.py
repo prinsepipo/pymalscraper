@@ -32,7 +32,7 @@ class Scraper:
         Returns:
             Return a list of tuple that contains the nane and url of the anime.
         """
-        url = self.MAL_ANIME_URL + name
+        url = self.MAL_ANIME_URL + str(name)
         res = get(url, self.headers)
 
         if res.status_code != 200:
@@ -44,14 +44,14 @@ class Scraper:
         try:
             div = soup.find(
                 'div', {'class': 'js-categories-seasonal js-block-list list'})
-            table_rows = div.find_all('tr')[1:5]
+            table_rows = div.find_all('tr')[1:6]
 
             for row in table_rows:
                 td = row.find_all('td')[1]
                 a = td.find('a')
                 queryset.append((a.text, a['href']))
         except Exception as e:
-            print(f'Parse Error\n.{e}')
+            print(f'Parse Error.\n{e}')
 
         return queryset
 
@@ -130,51 +130,58 @@ class Scraper:
 
         return list(animes)
 
-    def get_character(self, name):
+    def search_character(self, name):
         """
-        Gets the character model data.
+        Args:
+            name: Name of the character.
+
+        Returns:
+            Return a list of tuple that contains the name and url of the character.
+        """
+        url = self.MAL_CHAR_URL + str(name)
+        res = get(url, headers=self.headers)
+
+        if res.status_code != 200:
+            raise Exception(f'Response code {res.status_code}.')
+
+        soup = BeautifulSoup(res.text)
+        queryset = []
+
+        try:
+            div = soup.find('div', {'id': 'content'})
+            table = div.find('table')
+            table_rows = table.find_all('tr')[1:6]
+
+            for row in table_rows:
+                td = row.find_all('td')[1]
+                a = td.find('a')
+                queryset.append((a.text, a['href']))
+        except Exception as e:
+            print(f'Parse Error.\n{e}')
+
+        return queryset
+
+    def get_character(self, name=None, url=None):
+        """
+        Get the character model data. Method only accepts one parameter, either name or url.
 
         Args:
             name: Name of the character.
+            url: Url of the character.
 
         Returns:
             Return the Character model data.
         """
-        # Gets the character url.
-        char_url = self.get_character_url(str(name))
+        char_url = None
 
-        if char_url is None:
-            print(f'{name} not found.')
-            return None
+        if name and not url:
+            char_url = self.search_character(str(name))[0][1]
+        elif url and not name:
+            char_url = url
+        else:
+            raise ValueError('Method needs one parameter, anime or url.')
 
         return Character(char_url)
-
-    def get_character_url(self, name):
-        """
-        Gets the url of the character from the website.
-
-        Args:
-            name: Name of the character.
-
-        Returns:
-            Returns the scraped character url.
-        """
-        url = self.MAL_CHAR_URL + str(name)
-        res = get(url, headers=self.headers)
-        soup = BeautifulSoup(res.text, features='lxml')
-        lnk = None
-
-        try:
-            a = soup.find('div', {'id': 'content'})
-            table = a.find('table',
-                           {'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'})
-            td = table.find('td', {'width': '175'})
-            a = td.find('a')
-            lnk = a['href']
-        except Exception as e:
-            print(f'Error getting character url.\nError: {e}')
-
-        return lnk
 
     def get_all_characters(self, start=0, end=10000):
         """
