@@ -1,4 +1,5 @@
 from .models import Anime, Character
+from .shortcuts import get
 
 import requests
 from bs4 import BeautifulSoup
@@ -26,54 +27,58 @@ class Scraper:
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
 
-    def get_anime(self, anime):
+    def search_anime(self, name):
         """
-        Get the anime model data.
+        Args:
+            anime: Name of anime.
+
+        Returns:
+            Return a list of tuple that contains the nane and url of the anime.
+        """
+        url = self.MAL_ANIME_URL + name
+        res = get(url, self.headers)
+
+        if res.status_code != 200:
+            raise Exception(f'Response code {res.status_code}.')
+
+        soup = BeautifulSoup(res.text, features='lxml')
+        queryset = []
+
+        try:
+            div = soup.find(
+                'div', {'class': 'js-categories-seasonal js-block-list list'})
+            table_rows = div.find_all('tr')[1:5]
+
+            for row in table_rows:
+                td = row.find_all('td')[1]
+                a = td.find('a')
+                queryset.append((a.text, a['href']))
+        except Exception as e:
+            print(f'Parse Error\n.{e}')
+
+        return queryset
+
+    def get_anime(self, name=None, url=None):
+        """
+        Get the anime model data. Method only accepts one parameter, either name or url.
 
         Args:
-            anime: The name of the anime.
+            name: The name of the anime.
+            url: The url of the anime.
 
         Returns:
             Return the Anime model data.
-
-        Raises:
-            TypeError: Argument anime must be string.
         """
-        if type(anime) != str:
-            raise TypeError('Argument anime must be string.')
+        anime_url = None
 
-        # Gets the anime url.
-        anime_url = self.get_anime_url(anime)
+        if name and not url:
+            anime_url = self.search_anime(str(name))[0][1]
+        elif url and not name:
+            anime_url = url
+        else:
+            raise ValueError('Method needs one parameter, anime or url.')
 
         return Anime(anime_url)
-
-    def get_anime_url(self, anime):
-        """Gets the url of the anime from the website.
-
-        Args:
-            anime: Name of the anime.
-
-        Returns:
-            Return the scraped anime url.
-        """
-        url = self.MAL_ANIME_URL + anime
-
-        res = requests.get(url, headers=self.headers)
-        req_count = 0
-        while res.status_code != 200 and req_count <= 10:
-            print(res.status_code)
-            time.sleep(1)
-            res = requests.get(url, headers=self.headers)
-            req_count += 1
-
-        soup = BeautifulSoup(res.text, features='lxml')
-        lnk = None
-        try:
-            a = soup.find('a', {'class': 'hoverinfo_trigger fw-b fl-l'})
-            lnk = a['href']
-        except Exception as e:
-            print(f'Error getting anime url.\nError: {e}')
-        return lnk
 
     def get_all_anime(self, start=0, end=16150):
         """

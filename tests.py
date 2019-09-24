@@ -4,9 +4,11 @@ from pymalscraper.scraper import Scraper
 
 
 class AnimeTests(unittest.TestCase):
+    def setUp(self):
+        self.scraper = Scraper()
+
     def test_get_anime(self):
-        scraper = Scraper()
-        anime = scraper.get_anime('kimi no na wa')
+        anime = self.scraper.get_anime('kimi no na wa')
         data = anime.get_data()
         self.assertEqual(type(data), type({}))
 
@@ -30,6 +32,11 @@ class AnimeTests(unittest.TestCase):
                     self.assertIn('http', value)
             else:
                 self.assertTrue(value == '')
+
+    def test_search_anime(self):
+        results = self.scraper.search_anime('kimi no na wa')
+        self.assertTrue(type(results) == type([]))
+        self.assertEqual(len(results), 5)
 
 
 if __name__ == '__main__':
