@@ -1,6 +1,7 @@
 import unittest
 
 from pymalscraper.scraper import Scraper
+from pymalscraper.models import Anime
 
 
 class AnimeTests(unittest.TestCase):
@@ -36,7 +37,35 @@ class AnimeTests(unittest.TestCase):
     def test_search_anime(self):
         results = self.scraper.search_anime('kimi no na wa')
         self.assertTrue(type(results) == type([]))
-        self.assertEqual(len(results), 5)
+        self.assertLessEqual(len(results), 5)
+
+    def test_get_all_anime(self):
+        start = 0
+        end = 50
+        result = self.scraper.get_all_anime(start=0, end=50)
+
+        self.assertTrue(len(result) != 0)
+        self.assertEqual(len(result), end - start)
+        self.assertEqual(type(result), type([]))
+
+    def test_search_character(self):
+        results = self.scraper.search_character('mitsuha')
+        self.assertEqual(type(results), type([]))
+        self.assertLessEqual(len(results), 5)
+
+    def test_get_character(self):
+        result = self.scraper.get_character('mitsuha')
+        self.assertIsNotNone(result)
+        self.assertIsNotNone(result.name)
+
+    def test_get_all_character(self):
+        start = 0
+        end = 50
+        results = self.scraper.get_all_characters(start=start, end=end)
+
+        self.assertNotEqual(len(results), 0)
+        self.assertEqual(len(results), end - start)
+        self.assertEqual(type(results), type([]))
 
 
 if __name__ == '__main__':
