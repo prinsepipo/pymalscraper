@@ -2,20 +2,17 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+from .shortcuts import get
+
 
 class Anime:
     def __init__(self, url):
-        print(f'Scraping {url}')
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
-        res = requests.get(url, headers=headers)
-        while res.status_code != 200:
-            time.sleep(1)
-            res = requests.get(url, headers=headers)
-
+        res = get(url, headers=headers)
         self._soup = BeautifulSoup(res.text, features='lxml')
-        print(f'Done.')
+        print(f'Scraped {url}')
 
     @property
     def title(self):
@@ -195,18 +192,13 @@ def __repr__(self):
 
 class Character:
     def __init__(self, url):
-        print(f'Scraping {url}')
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
-        res = requests.get(url, headers=self.headers)
-        while res.status_code != 200:
-            time.sleep(1)
-            res = requests.get(url, headers=self.headers)
-
+        res = get(url, headers=self.headers)
         self._soup = BeautifulSoup(res.text, features='lxml')
         self._url = url
-        print('Done.')
+        print(f'Scraped {url}')
 
     @property
     def name(self):
@@ -217,7 +209,7 @@ class Character:
                 'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('div', {'class': 'normal_header'})
             name = div.text
         except Exception as e:
-            print(f'Error at name. Error: {e}')
+            print(f'Error at name.\nError: {e}')
 
         return name
 
@@ -229,7 +221,7 @@ class Character:
             img = self._soup.find('div', {'id': 'content'}).find('img')
             poster = img['src']
         except Exception as e:
-            print(f'Error at posters. Error: {e}')
+            print(f'Error at posters.\nError: {e}')
 
         return poster
 

@@ -77,9 +77,9 @@ class Scraper:
 
         return Anime(anime_url)
 
-    def get_all_anime(self, start=0, end=16150):
+    def get_all_anime(self, start=0, end=10000):
         """
-        Scrape all the anime from the website. Scrapes 50 anime each method call.
+        Scrape all the anime from the website. Scrapes 50 anime from start to end.
         Note: Stoping the process will result to loss of data.
 
         Args:
@@ -88,18 +88,7 @@ class Scraper:
 
         Returns:
             Return a list of Anime model data.
-
-        Raises:
-            ValueError: Argument start must be greater than or equal to 0, or less than or equal to 16150.
-            ValueError: Argument end must be divisible by 50, or less than or equal to 16100.
         """
-        if start < 0 or start > 16150:
-            raise ValueError(
-                'Argument start must be greater than or equal to 0, or less than or equal to 16150.')
-        if end % 50 != 0 or end > 16150:
-            raise ValueError(
-                'Argument end must be divisible by 50, or less than or equal to 16100.')
-
         total_anime = end - 50
         count = start
         links = []
@@ -144,7 +133,7 @@ class Scraper:
         if res.status_code != 200:
             raise Exception(f'Response code {res.status_code}.')
 
-        soup = BeautifulSoup(res.text)
+        soup = BeautifulSoup(res.text, features='lxml')
         queryset = []
 
         try:
@@ -185,7 +174,8 @@ class Scraper:
 
     def get_all_characters(self, start=0, end=10000):
         """
-        Scrape all the character from the website. Scrapes 50 character each method call.
+        Scrape all the character from the website. Scrapes 50 character from start to end.
+        Note: Stoping the process will result to loss of data.
 
         Args:
             start: Where to begin scraping.
@@ -193,18 +183,7 @@ class Scraper:
 
         Returns:
             Return a list of Character model data.
-
-        Raises:
-            ValueError: Argument start must be greater than or equal to 0, or less than or equal to 16150.
-            ValueError: Argument end must be divisible by 50, or less than or equal to 16100.
         """
-        if start < 0 or start > 10000:
-            raise ValueError(
-                'Argument start must be greater than or equal to 0, or less than or equal to 16150.')
-        if end % 50 != 0 or end > 10000:
-            raise ValueError(
-                'Argument end must be divisible by 50, or less than or equal to 16100.')
-
         total_anime = end - 50
         count = start
         links = []
@@ -227,6 +206,8 @@ class Scraper:
                 print(e)
 
             count += 50
+
+        print(f'Scraping animes total of {len(links)}')
 
         with ThreadPoolExecutor() as executor:
             chars = executor.map(Character, links)
