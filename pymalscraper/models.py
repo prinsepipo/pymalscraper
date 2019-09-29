@@ -185,9 +185,8 @@ class Anime:
 
         return data
 
-
-def __repr__(self):
-    return f'<models.Anime \'{self.title}\'>'
+    def __repr__(self):
+        return f'<models.Anime \'{self.title}\'>'
 
 
 class Character:
@@ -202,7 +201,7 @@ class Character:
 
     @property
     def name(self):
-        name = None
+        name = ''
 
         try:
             div = self._soup.find('div', {'id': 'content'}).find(
@@ -215,7 +214,7 @@ class Character:
 
     @property
     def poster(self):
-        poster = None
+        poster = ''
 
         try:
             img = self._soup.find('div', {'id': 'content'}).find('img')
@@ -227,11 +226,17 @@ class Character:
 
     def get_gallery(self):
         url = self._url + '/pictures'
-        res = requests.get(url, headers=self.headers)
+        res = get(url, headers=self.headers)
         soup = BeautifulSoup(res.text, features='lxml')
         imgs = soup.find('div', {'id': 'content'}).find(
             'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('table').find_all('img')
-        return [img['src'] for img in imgs]
+        gallery = []
+
+        for img in imgs:
+            if img['src']:
+                gallery.append(img['src'])
+
+        return gallery
 
     def __repr__(self):
         return f'<models.Character \'{self.name}\'>'
