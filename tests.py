@@ -41,12 +41,18 @@ class AnimeTests(unittest.TestCase):
 
     def test_get_all_anime(self):
         start = 0
-        end = 50
-        result = self.scraper.get_all_anime(start=0, end=50)
+        end = 0
+        result = self.scraper.get_all_anime(start=start, end=end)
 
-        self.assertTrue(len(result) != 0)
+        self.assertIsNotNone(result)
         self.assertEqual(len(result), end - start)
         self.assertEqual(type(result), type([]))
+
+        for anime in result:
+            data = anime.get_data()
+
+            for key in data.keys():
+                self.assertIsNot(data[key])
 
     def test_search_character(self):
         results = self.scraper.search_character('mitsuha')
@@ -60,12 +66,17 @@ class AnimeTests(unittest.TestCase):
 
     def test_get_all_character(self):
         start = 0
-        end = 50
+        end = 100
         results = self.scraper.get_all_characters(start=start, end=end)
 
-        self.assertNotEqual(len(results), 0)
+        self.assertIsNotNone(results)
         self.assertEqual(len(results), end - start)
         self.assertEqual(type(results), type([]))
+
+        for character in results:
+            self.assertIsNotNone(character.name)
+            self.assertIsNotNone(character.poster)
+            self.assertIsNotNone(character.get_gallery())
 
 
 if __name__ == '__main__':
