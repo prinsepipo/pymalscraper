@@ -1,10 +1,8 @@
 from .models import Anime, Character
 from .shortcuts import get
 
-import requests
 from bs4 import BeautifulSoup
 
-import time
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -15,72 +13,76 @@ class Scraper:
 
     def __init__(self):
         """
-        Initialize the scraper.
+        Initialize scraper.
         """
-        # MAL search url
-        self.MAL_ANIME_URL = 'https://myanimelist.net/anime.php?q='
-        self.MAL_CHAR_URL = 'https://myanimelist.net/character.php?q='
+        # MAL URLS
+        self.BASE_URL = 'https://myanimelist.net'
+        self.ANIME_SEARCH_URL = self.BASE_URL + '/anime.php?q='
+        self.CHARACTER_SEARCH_URL = self.BASE_URL + '/character.php?q='
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
+            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) '
+                          'Gecko/20100101 Firefox/68.0'
         }
 
     def search_anime(self, name):
         """
+        Search the anime.
+
         Args:
             name: Name of anime.
 
         Returns:
             Return a list of tuple that contains the nane and url of the anime.
+
+        Raises:
+            TypeError: Argument 'name' must be string.
         """
-        url = self.MAL_ANIME_URL + str(name)
+        if type(name) != str:
+            raise TypeError("Argument 'name' must be string.")
+
+        url = self.ANIME_SEARCH_URL + name
         res = get(url, self.headers)
-
-        if res.status_code != 200:
-            raise Exception(f'Response code {res.status_code}.')
-
         soup = BeautifulSoup(res.text, features='lxml')
         queryset = []
 
         try:
-            div = soup.find(
+            div = soup.find('div', {'id': 'content'}).find(
                 'div', {'class': 'js-categories-seasonal js-block-list list'})
-            table_rows = div.find_all('tr')[1:6]
+            table_rows = div.find('table').find_all('tr')[1:6]
 
             for row in table_rows:
                 td = row.find_all('td')[1]
                 a = td.find('a')
                 queryset.append((a.text, a['href']))
         except Exception as e:
-            print(f'Parse Error.\n{e}')
+            print(f'Error at search_anime.\n{e}')
 
         return queryset
 
-    def get_anime(self, name=None, url=None):
+    def get_anime(self, name):
         """
-        Get the anime model data. Method only accepts one parameter, either name or url.
+        Get the anime model data.
 
         Args:
             name: The name of the anime.
-            url: The url of the anime.
 
         Returns:
             Return the Anime model data.
+
+        Raises:
+            TypeError: Argument 'name' must be string.
         """
-        anime_url = None
+        if type(name) != str:
+            raise TypeError("Argument 'name' must be string.")
 
-        if name and not url:
-            anime_url = self.search_anime(str(name))[0][1]
-        elif url and not name:
-            anime_url = url
-        else:
-            raise ValueError('Method needs one parameter, anime or url.')
-
-        return Anime(anime_url)
+        url = self.search_anime(str(name))[0][1]
+        return Anime(url)
 
     def get_all_anime(self, start=0, end=10000):
         """
-        Scrape all the anime from the website. Scrapes 50 anime from start to end.
-        Note: Stoping the process will result to loss of data.
+        Scrape all the anime from the website. Scrapes 50 anime from start to
+        end.
+        Note: Stopping the process will result to loss of data.
 
         Args:
             start: Where to begin scraping.
@@ -89,127 +91,140 @@ class Scraper:
         Returns:
             Return a list of Anime model data.
         """
-        total_anime = end - 50
+        up_to = end - 50
         count = start
         links = []
 
-        while count <= total_anime:
-            url = f'https://myanimelist.net/topanime.php?limit={count}'
+        print(f'Parsing total of {end - start}')
+
+        while count <= up_to:
+            url = self.BASE_URL + '/topanime.php?limit=' + str(count)
             res = get(url, headers=self.headers)
+
+            # Parse the response data.
             soup = BeautifulSoup(res.text, features='lxml')
 
             try:
-                aa = soup.find_all(
-                    'a', {'class': 'hoverinfo_trigger fl-l fs14 fw-b'})
+                div = soup.find('div', {'id': 'content'}).find(
+                    'div', {'class': 'pb12'})
+                rows = div.find(
+                    'table', {'class': 'top-ranking-table'}).find_all('tr', {'class': 'ranking-list'})
 
-                for a in aa:
-                    link = a['href']
-
-                    if link:
-                        links.append(link)
+                for i, row in enumerate(rows):
+                    a = row.find('div', {'class': 'detail'}).find(
+                        'a', {'class': 'hoverinfo_trigger fl-l fs14 fw-b'})
+                    links.append(a['href'])
             except Exception as e:
-                print(e)
+                print(f'Error at get_all_anime.\n{e}')
 
             count += 50
 
-        print(f'Scraping animes total of {len(links)}')
+        print(f'Scraping total of {len(links)} anime.')
 
         with ThreadPoolExecutor() as executor:
             animes = executor.map(Anime, links)
 
         return list(animes)
 
-    def search_character(self, name):
+    def get_character(self, name):
         """
+        Get character data.
+
         Args:
             name: Name of the character.
 
         Returns:
-            Return a list of tuple that contains the name and url of the character.
+            Return the Character model data.
+
+        Raises:
+            TypeError: Argument 'name' must be string.
         """
-        url = self.MAL_CHAR_URL + str(name)
+        if type(name) != str:
+            raise TypeError("Argument 'name' must be string.")
+
+        url = self.search_character(name)[0][1]
+        return Character(url)
+
+    def search_character(self, name):
+        """
+        Search the character. Note that searches are not 100% accurate. To compensate,
+        this returns 5 search results. Each result is a tuple containing the name then then url of the character.
+
+        Args:
+            name: Name of the character.
+
+        Returns:
+            Return a list of tuple containing name and url of the character.
+
+        Raises:
+            TypeError: Argument 'name' must be string.
+        """
+        if type(name) != str:
+            raise TypeError("Argument 'name' must be string.")
+
+        url = self.CHARACTER_SEARCH_URL + name
         res = get(url, headers=self.headers)
-
-        if res.status_code != 200:
-            raise Exception(f'Response code {res.status_code}.')
-
         soup = BeautifulSoup(res.text, features='lxml')
         queryset = []
 
         try:
-            div = soup.find('div', {'id': 'content'})
-            table = div.find('table')
-            table_rows = table.find_all('tr')[1:6]
+            # {'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}
+            table = soup.find('div', {'id': 'content'}).find_next(
+                'table')
+            table_rows = table.find_all('tr')
 
-            for row in table_rows:
-                td = row.find_all('td')[1]
-                a = td.find('a')
+            for row in table_rows[1:6]:
+                a = row.find(
+                    'td', {'class': 'borderClass bgColor1', 'width': '175'}).find('a')
                 queryset.append((a.text, a['href']))
         except Exception as e:
-            print(f'Parse Error.\n{e}')
+            print(f'Error at search_character.\n{e}')
 
         return queryset
 
-    def get_character(self, name=None, url=None):
-        """
-        Get the character model data. Method only accepts one parameter, either name or url.
-
-        Args:
-            name: Name of the character.
-            url: Url of the character.
-
-        Returns:
-            Return the Character model data.
-        """
-        char_url = None
-
-        if name and not url:
-            char_url = self.search_character(str(name))[0][1]
-        elif url and not name:
-            char_url = url
-        else:
-            raise ValueError('Method needs one parameter, anime or url.')
-
-        return Character(char_url)
-
     def get_all_characters(self, start=0, end=10000):
         """
-        Scrape all the character from the website. Scrapes 50 character from start to end.
-        Note: Stoping the process will result to loss of data.
+        Scrape all the anime from the website. Scrapes 50 anime from start to
+        end.
+        Note: Stopping the process will result to loss of data.
 
         Args:
             start: Where to begin scraping.
             end: Where to end scraping.
 
         Returns:
-            Return a list of Character model data.
+            Return a list of Anime model data.
         """
-        total_anime = end - 50
+        up_to = end - 50
         count = start
         links = []
 
-        while count <= total_anime:
-            url = f'https://myanimelist.net/character.php?limit={count}'
+        print(f'Parsing total of {end - start}')
+
+        while count <= up_to:
+            url = self.BASE_URL + '/character.php?limit=' + str(count)
             res = get(url, headers=self.headers)
+
+            # Parse the response data.
             soup = BeautifulSoup(res.text, features='lxml')
 
             try:
-                aa = soup.find('div', {'id': 'content'}).find_all(
-                    'a', {'class': 'fs14 fw-b'})
+                table = soup.find('div', {'id': 'content'}).find(
+                    'table', {'class': 'characters-favorites-ranking-table'})
+                table_rows = table.find_all('tr', {'class': 'ranking-list'})
 
-                for a in aa:
-                    link = a['href']
-
-                    if link:
-                        links.append(link)
+                for row in table_rows:
+                    a = row.find('td', {'class': 'people'}).find(
+                        'div', {'class': 'information di-ib mt24'}).find('a')
+                    links.append(a['href'])
             except Exception as e:
-                print(e)
+                print(f'Error at get_all_characters.\n{e}')
 
             count += 50
 
-        print(f'Scraping animes total of {len(links)}')
+        print(f'Scraping total of {len(links)} anime.')
 
         with ThreadPoolExecutor() as executor:
-            chars = executor.map(Character, links)
+            characters = executor.map(Character, links)
 
-        return list(chars)
+        return list(characters)

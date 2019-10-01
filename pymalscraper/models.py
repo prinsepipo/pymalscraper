@@ -1,25 +1,27 @@
-import time
-import requests
 from bs4 import BeautifulSoup
+from requests import HTTPError
 
 from .shortcuts import get
 
 
 class Anime:
     def __init__(self, url):
+        print(f'Scraping {url}')
+
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
         }
         res = get(url, headers=headers)
         self._soup = BeautifulSoup(res.text, features='lxml')
-        print(f'Scraped {url}')
+        self.url = url
 
     @property
     def title(self):
-        title = ''
+        title = None
 
         try:
-            span = self._soup.find('span', {'itemprop': 'name'})
+            div = self._soup.find('div', {'id': 'contentWrapper'})
+            span = div.find('span', {'itemprop': 'name'})
             title = span.text
         except:
             print('Anime: Skipping title.')
@@ -28,7 +30,7 @@ class Anime:
 
     @property
     def english_title(self):
-        title = ''
+        title = None
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
@@ -44,7 +46,7 @@ class Anime:
 
     @property
     def japanese_title(self):
-        title = ''
+        title = None
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
@@ -60,7 +62,7 @@ class Anime:
 
     @property
     def synonyms(self):
-        syn = ''
+        syn = None
 
         try:
             divs = self._soup.find_all('div', {'class': 'spaceit_pad'})
@@ -89,7 +91,7 @@ class Anime:
 
     @property
     def animetype(self):
-        atype = ''
+        atype = None
 
         try:
             divs = self._soup.find(
@@ -106,11 +108,12 @@ class Anime:
 
     @property
     def episodes(self):
-        eps = ''
+        eps = None
 
         try:
             divs = self._soup.find(
-                'div', {'class': 'js-scrollfix-bottom'}).find_all('div', {'class': 'spaceit'})
+                'div', {'class': 'js-scrollfix-bottom'}).find_all('div',
+                                                                  {'class': 'spaceit'})
 
             for div in divs:
                 if 'Episodes:' in div.text:
@@ -123,7 +126,7 @@ class Anime:
 
     @property
     def genres(self):
-        genres = ''
+        genres = None
 
         try:
             divs = self._soup.find(
@@ -140,7 +143,7 @@ class Anime:
 
     @property
     def poster(self):
-        poster = ''
+        poster = None
 
         try:
             img = self._soup.find('img', {'class': 'ac'})
@@ -152,7 +155,7 @@ class Anime:
 
     @property
     def trailer(self):
-        trailer = ''
+        trailer = None
 
         try:
             a = self._soup.find(
@@ -201,11 +204,12 @@ class Character:
 
     @property
     def name(self):
-        name = ''
+        name = None
 
         try:
-            div = self._soup.find('div', {'id': 'content'}).find(
-                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('div', {'class': 'normal_header'})
+            div = self._soup.find('div', {'id': 'content'}).find('table').find(
+                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
+                'div', {'class': 'normal_header'})
             name = div.text
         except:
             print('Character: Skipping name.')
@@ -213,8 +217,21 @@ class Character:
         return name
 
     @property
+    def alternate_names(self):
+        name = None
+
+        try:
+            div = self._soup.find('div', {'id': 'contentWrapper'}).find('div')
+            h1 = div.find('h1', {'class': 'h1'})
+            name = h1.text.split('"', 2)[1]
+        except:
+            print('Character: Skipping alternate names.')
+
+        return name
+
+    @property
     def poster(self):
-        poster = ''
+        poster = None
 
         try:
             img = self._soup.find('div', {'id': 'content'}).find('img')
@@ -228,11 +245,12 @@ class Character:
         url = self._url + '/pictures'
         res = get(url, headers=self.headers)
         soup = BeautifulSoup(res.text, features='lxml')
+        gallery = []
 
         try:
             imgs = soup.find('div', {'id': 'content'}).find(
-                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find('table').find_all('img')
-            gallery = []
+                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
+                'table').find_all('img')
 
             for i, img in enumerate(imgs):
                 try:
