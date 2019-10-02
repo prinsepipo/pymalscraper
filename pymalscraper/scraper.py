@@ -11,7 +11,7 @@ class Scraper:
     Scrape data from https://myanimelist.net/.
     """
 
-    def __init__(self):
+    def __init__(self, request_interval=2, max_request=999):
         """
         Initialize scraper.
         """
@@ -23,6 +23,8 @@ class Scraper:
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) '
                           'Gecko/20100101 Firefox/68.0'
         }
+        self.request_interval = request_interval
+        self.max_request = max_request
 
     def search_anime(self, name):
         """
@@ -41,7 +43,8 @@ class Scraper:
             raise TypeError("Argument 'name' must be string.")
 
         url = self.ANIME_SEARCH_URL + name
-        res = get(url, self.headers)
+        res = get(url, headers=self.headers,
+                  interval=self.request_interval, max=self.max_request)
         soup = BeautifulSoup(res.text, features='lxml')
         queryset = []
 
@@ -99,7 +102,8 @@ class Scraper:
 
         while count <= up_to:
             url = self.BASE_URL + '/topanime.php?limit=' + str(count)
-            res = get(url, headers=self.headers)
+            res = get(url, headers=self.headers,
+                      interval=self.request_interval, max=self.max_request)
 
             # Parse the response data.
             soup = BeautifulSoup(res.text, features='lxml')
@@ -121,10 +125,8 @@ class Scraper:
 
         print(f'Scraping total of {len(links)} anime.')
 
-        with ThreadPoolExecutor() as executor:
-            animes = executor.map(Anime, links)
-
-        return list(animes)
+        animes = [Anime(url) for url in links]
+        return animes
 
     def get_character(self, name):
         """
@@ -163,7 +165,8 @@ class Scraper:
             raise TypeError("Argument 'name' must be string.")
 
         url = self.CHARACTER_SEARCH_URL + name
-        res = get(url, headers=self.headers)
+        res = get(url, headers=self.headers,
+                  interval=self.request_interval, max=self.max_request)
         soup = BeautifulSoup(res.text, features='lxml')
         queryset = []
 
@@ -203,7 +206,8 @@ class Scraper:
 
         while count <= up_to:
             url = self.BASE_URL + '/character.php?limit=' + str(count)
-            res = get(url, headers=self.headers)
+            res = get(url, headers=self.headers,
+                      interval=self.request_interval, max=self.max_request)
 
             # Parse the response data.
             soup = BeautifulSoup(res.text, features='lxml')
@@ -224,7 +228,5 @@ class Scraper:
 
         print(f'Scraping total of {len(links)} anime.')
 
-        with ThreadPoolExecutor() as executor:
-            characters = executor.map(Character, links)
-
-        return list(characters)
+        characters = [Character(url) for url in links]
+        return characters

@@ -5,7 +5,7 @@ from pymalscraper.scraper import Scraper
 
 class ScraperTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.scraper = Scraper()
+        self.scraper = Scraper(max_request=50)
 
     def test_get_all_anime(self):
         start = 0
