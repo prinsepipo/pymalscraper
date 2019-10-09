@@ -2,8 +2,6 @@
 
 Scrapes data from https://myanimelist.net/.
 
-By default, the model attribute will return an empty string or empty list if there is no data.
-
 ## Anime Model
 
 - Title
