@@ -1,19 +1,20 @@
 from bs4 import BeautifulSoup
-from requests import HTTPError
 
-from .shortcuts import get
+from .shortcuts import get, log
 
 
 class Anime:
     def __init__(self, url):
-        print(f'Scraping {url}')
+        self._soup = None
+        self.q = url.split('/')[-1]
 
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
-        }
-        res = get(url, headers=headers)
-        self._soup = BeautifulSoup(res.text, features='lxml')
-        self.url = url
+        try:
+            res = get(url)
+            self._soup = BeautifulSoup(res.text, features='lxml')
+        except Exception as e:
+            msg = f'Anime model exception.\nURL: {url}\nEXCEPTION: {e}\n'
+            log(msg)
+            print(msg)
 
     @property
     def title(self):
@@ -23,8 +24,8 @@ class Anime:
             div = self._soup.find('div', {'id': 'contentWrapper'})
             span = div.find('span', {'itemprop': 'name'})
             title = span.text
-        except:
-            print('Anime: Skipping title.')
+        except Exception as e:
+            print(f'{self.q} title: {e}')
 
         return title
 
@@ -39,8 +40,8 @@ class Anime:
                 if 'English:' in div.text:
                     title = div.text.replace('English:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping english title.')
+        except Exception as e:
+            print(f'{self.q} english title: {e}')
 
         return title
 
@@ -55,8 +56,8 @@ class Anime:
                 if 'Japanese:' in div.text:
                     title = div.text.replace('Japanese:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping japanese title .')
+        except Exception as e:
+            print(f'{self.q} japanese title: {e}')
 
         return title
 
@@ -72,20 +73,20 @@ class Anime:
                     syn = div.text.replace(
                         'Synonyms:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping synonyms.')
+        except Exception as e:
+            print(f'{self.q} synonyms: {e}')
 
         return syn
 
     @property
     def synopsis(self):
-        synopsis = ''
+        synopsis = None
 
         try:
             span = self._soup.find('span', {'itemprop': 'description'})
             synopsis = span.text
-        except:
-            print('Anime: Skipping synopsis.')
+        except Exception as e:
+            print(f'{self.q} synopsis: {e}')
 
         return synopsis
 
@@ -101,8 +102,8 @@ class Anime:
                 if 'Type:' in div.text:
                     atype = div.text.replace('Type:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping anime type.')
+        except Exception as e:
+            print(f'{self.q} anime type: {e}')
 
         return atype
 
@@ -119,8 +120,8 @@ class Anime:
                 if 'Episodes:' in div.text:
                     eps = div.text.replace('Episodes:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping episodes.')
+        except Exception as e:
+            print(f'{self.q} episodes: {e}')
 
         return eps
 
@@ -136,8 +137,8 @@ class Anime:
                 if 'Genres:' in div.text:
                     genres = div.text.replace('Genres:', '').rstrip().lstrip()
                     break
-        except:
-            print('Anime: Skipping genres.')
+        except Exception as e:
+            print(f'{self.q} genres: {e}')
 
         return genres
 
@@ -148,8 +149,8 @@ class Anime:
         try:
             img = self._soup.find('img', {'class': 'ac'})
             poster = img['src']
-        except:
-            print('Anime: Skipping poster.')
+        except Exception as e:
+            print(f'{self.q} poster: {e}')
 
         return poster
 
@@ -161,8 +162,8 @@ class Anime:
             a = self._soup.find(
                 'a', {'class': 'iframe js-fancybox-video video-unit promotion'})
             trailer = a['href']
-        except:
-            print('Anime: Skipping trailer.')
+        except Exception as e:
+            print(f'{self.q} trailer: {e}')
 
         return trailer
 
@@ -194,13 +195,17 @@ class Anime:
 
 class Character:
     def __init__(self, url):
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
-        }
-        res = get(url, headers=self.headers)
-        self._soup = BeautifulSoup(res.text, features='lxml')
         self._url = url
-        print(f'Scraped {url}')
+        self._soup = None
+        self.q = url.split('/')[-1]
+
+        try:
+            res = get(url)
+            self._soup = BeautifulSoup(res.text, features='lxml')
+        except Exception as e:
+            msg = f'Anime model exception.\nURL: {url}\nEXCEPTION: {e}\n'
+            log(msg)
+            print(msg)
 
     @property
     def name(self):
@@ -211,8 +216,8 @@ class Character:
                 'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
                 'div', {'class': 'normal_header'})
             name = div.text
-        except:
-            print('Character: Skipping name.')
+        except Exception as e:
+            print(f'{self.q} name: {e}')
 
         return name
 
@@ -224,8 +229,8 @@ class Character:
             div = self._soup.find('div', {'id': 'contentWrapper'}).find('div')
             h1 = div.find('h1', {'class': 'h1'})
             name = h1.text.split('"', 2)[1]
-        except:
-            print('Character: Skipping alternate names.')
+        except Exception as e:
+            print(f'{self.q} alternate_names: {e}')
 
         return name
 
@@ -236,14 +241,14 @@ class Character:
         try:
             img = self._soup.find('div', {'id': 'content'}).find('img')
             poster = img['src']
-        except:
-            print('Character: Skipping poster.')
+        except Exception as e:
+            print(f'{self.q} poster: {e}')
 
         return poster
 
     def get_gallery(self):
         url = self._url + '/pictures'
-        res = get(url, headers=self.headers)
+        res = get(url)
         soup = BeautifulSoup(res.text, features='lxml')
         gallery = []
 
@@ -255,10 +260,10 @@ class Character:
             for i, img in enumerate(imgs):
                 try:
                     gallery.append(img['src'])
-                except:
-                    print(f'Character: Skipping gallery image #{i + 1}.')
-        except:
-            print('Character: Skipping Gallery.')
+                except Exception as e:
+                    print(e)
+        except Exception as e:
+            print(f'{self.q} gallery: {e}')
 
         return gallery
 

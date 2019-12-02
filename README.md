@@ -2,8 +2,6 @@
 
 Scrapes data from https://myanimelist.net/.
 
-By default, the model attribute will return an empty string or empty list if there is no data.
-
 ## Anime Model
 
 - Title
@@ -32,8 +30,8 @@ pip install pymalscraper
 ## Basic Usage
 
 ```python
-from pymalscraper.scraper import MALScraper
-scraper = MALScraper()
+from pymalscraper.scraper import Scraper
+scraper = Scraper()
 
 # Scraping Anime
 anime = scraper.get_anime("kimi no na wa.")

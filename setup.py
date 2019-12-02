@@ -5,9 +5,9 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
     setup(name='pymalscraper',
-          version='2.2.0',
+          version='3.0.0',
           author='prinsepipo',
-          author_email='prinse.sanchez@gmail.com',
+          author_email='prinsepipo.sanchez@gmail.com',
           description='Simple Anime Web Scraper.',
           long_description=long_description,
           long_description_content_type="text/markdown",
