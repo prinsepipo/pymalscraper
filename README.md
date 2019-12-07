@@ -17,7 +17,10 @@ Scrapes data from https://myanimelist.net/.
 
 ## Character Model
 
-- Name
+- Name (English)
+- Japanese Name
+- Alternate Names
+- Details
 - Poster
 - Gallery
 

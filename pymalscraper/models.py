@@ -216,6 +216,30 @@ class Character:
                 'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
                 'div', {'class': 'normal_header'})
             name = div.text
+
+            if '(' in name:
+                name = name[:name.find('(') - 1]
+
+            name = name.rstrip()
+        except Exception as e:
+            print(f'{self.q} name: {e}')
+
+        return name
+
+    @property
+    def japanese_name(self):
+        name = None
+
+        try:
+            div = self._soup.find('div', {'id': 'content'}).find('table').find(
+                'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
+                'div', {'class': 'normal_header'})
+            name = div.text
+
+            if '(' in name:
+                name = name[name.find('(') + 1:-1]
+
+            name = name.rstrip()
         except Exception as e:
             print(f'{self.q} name: {e}')
 
@@ -228,11 +252,28 @@ class Character:
         try:
             div = self._soup.find('div', {'id': 'contentWrapper'}).find('div')
             h1 = div.find('h1', {'class': 'h1'})
-            name = h1.text.split('"', 2)[1]
+            name = h1.text
+
+            if '"' in name:
+                name = name.split('"', 2)[1]
         except Exception as e:
             print(f'{self.q} alternate_names: {e}')
 
         return name
+
+    @property
+    def details(self):
+        details = None
+
+        try:
+            div = self._soup.find('div', {'id': 'content'}).find(
+                'table').find('td',  {'style': 'padding-left: 5px;', 'valign': 'top'})
+            details = div.text
+            details = details[:details.find('Voice Actors')]
+        except Exception as e:
+            print(f'{self.q} details: {e}')
+
+        return details
 
     @property
     def poster(self):
