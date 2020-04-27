@@ -4,27 +4,27 @@ import time
 
 import requests
 
-from . import config
 
-
-def get(url, interval=config.HTTP_REQUEST_INTERVAL, max_request=config.HTTP_MAX_REQUEST, headers=config.HTTP_HEADERS):
+def get(url):
     '''
     Custom get request. Recursively make request every designated interval.
 
     Args:
         url: URL link.
-        interval: The delay before making requests. Default 5 seconds.
-        max_request: Maximum number of request to be made. Default 999 requests.
 
     Returns:
         Return the http response.
     '''
-    time.sleep(interval)
-    res = requests.get(url)
-    max_request -= 1
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0'
+    }
+
+    res = requests.get(url, headers=headers, timeout=(2, 5))
+    max_request = 20
 
     if res.status_code != 200 and max_request != 0:
-        res = get(url, interval, max_request, headers)
+        res = get(url)
+        max_request -= 1
 
     if max_request == 0:
         return None
