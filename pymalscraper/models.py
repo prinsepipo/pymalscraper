@@ -190,7 +190,10 @@ class Anime:
         return data
 
     def __repr__(self):
-        return f'<models.Anime {id(self)}>'
+        return f'models.Anime<{self}>'
+
+    def __str__(self):
+        return self.title
 
 
 class Character:
@@ -309,4 +312,7 @@ class Character:
         return gallery
 
     def __repr__(self):
-        return f'<models.Character {id(self)}>'
+        return f'models.Anime<{self}>'
+
+    def __str__(self):
+        return self.name
