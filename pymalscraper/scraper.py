@@ -6,9 +6,9 @@ from .models import Anime, Character
 from .shortcuts import get, log, printd
 
 
-class Scraper:
+class MALScraper:
     '''
-    Scrape data from https://myanimelist.net/.
+    Create an instance to scrape data from https://myanimelist.net/.
     '''
 
     def __init__(self):
@@ -21,11 +21,13 @@ class Scraper:
         '''
         Search the anime.
 
+        Note that MAL only accepts string input query with atleast 3 characters.
+
         Args:
             name: Name of anime.
 
         Returns:
-            Return a list of tuple that contains the nane and url of the anime.
+            Return a list `Anime` objects.
 
         Raises:
             TypeError: Argument `name` must be string.
@@ -33,8 +35,8 @@ class Scraper:
         '''
         if type(name) != str:
             raise TypeError('Argument `name` type must be string.')
-        elif len(name) < 3:
-            raise ValueError('Argument `name` length must be >= 3.')
+        if len(name) < 3:
+            raise ValueError('Argument `name` must be 3 or more characters.')
 
         url = self.ANIME_SEARCH_URL + name
         queryset = []
@@ -54,34 +56,13 @@ class Scraper:
             for row in table_rows:
                 td = row.find_all('td')[1]
                 a = td.find('a')
-                queryset.append((a.text, a['href']))
+                queryset.append(a['href'])
         except Exception as e:
             msg = f'Function `search_anime` exception.\nURL: {url}\nEXCEPTION: {e}\n'
             log(msg)
             print(msg)
 
-        return queryset
-
-    def get_anime(self, name):
-        '''
-        Get the anime model data.
-
-        Args:
-            name: The name of the anime.
-
-        Returns:
-            Return the Anime model data.
-
-        Raises:
-            TypeError: Argument `name` must be string.
-        '''
-        if type(name) != str:
-            raise TypeError('Argument `name` must be string.')
-
-        # Get the first result of the search.
-        url = self.search_anime(name)[0][1]
-        print(f'Anime found: {url}')
-        return Anime(url)
+        return [Anime(url) for url in queryset]
 
     def get_all_anime(self, start=0, end=10000):
         '''

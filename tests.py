@@ -1,28 +1,25 @@
 import unittest
 
-from pymalscraper.scraper import Scraper
+from pymalscraper.scraper import MALScraper
+from pymalscraper.models import Anime
 
 
 class ScraperTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.scraper = Scraper()
+        self.scraper = MALScraper()
 
-    def test_search_anime(self):
-        results = self.scraper.search_anime('sword art online')
-        self.assertLessEqual(len(results), 5)
+    def test_search_anime_kimi_no_na_wa(self):
+        results = self.scraper.search_anime('kimi no na wa')
 
         for result in results:
-            self.assertIs(type(result), tuple)
-            self.assertIsNotNone(result[0])
-            self.assertIsNotNone(result[1])
-            self.assertIn(self.scraper.BASE_URL, result[1])
+            self.assertTrue(type(result), Anime)
 
-        # MAL requires query to have at least 3 byte characters to search.
+    def test_anime_search_errors(self):
         with self.assertRaises(ValueError):
             self.scraper.search_anime('re')
 
         with self.assertRaises(TypeError):
-            self.scraper.search_anime(100)
+            self.scraper.search_anime(101)
 
     def test_get_anime(self):
         anime = self.scraper.get_anime('kimi no nawa')
