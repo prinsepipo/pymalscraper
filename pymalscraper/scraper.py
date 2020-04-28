@@ -146,57 +146,35 @@ class MALScraper:
             Return a list of tuple containing name and url of the character.
 
         Raises:
-            TypeError: Argument 'name' must be string.
-            ValueError: Argument `name` length must be >= 3.
+            TypeError: Argument 'name' must be of type string.
+            ValueError: Argument `name` must be 3 or more characters.
         '''
         if type(name) != str:
-            raise TypeError('Argument `name` must be string.')
+            raise TypeError('Argument `name` must be of type string.')
         elif len(name) < 3:
-            raise ValueError('Argument `name` length must be >= 3.')
+            raise ValueError('Argument `name` must be 3 or more characters.')
+
+        url = self.CHARACTER_SEARCH_URL + name
+        urls = []
 
         print(f'Searching character {name}...')
-        url = self.CHARACTER_SEARCH_URL + name
-        queryset = []
 
         try:
             res = get(url)
             soup = BeautifulSoup(res.text, features='lxml')
 
-            # {'width': '100%', 'cellspacing': '0', 'cellpadding': '0', 'border': '0'}
-            table = soup.find('div', {'id': 'content'}).find_next(
-                'table')
-            table_rows = table.find_all('tr')
+            content_div = soup.find('div', {'id': 'content'})
+            results = content_div.find('table').find_all('tr')
 
-            for row in table_rows[1:6]:
-                a = row.find(
-                    'td', {'class': 'borderClass bgColor1', 'width': '175'}).find('a')
-                queryset.append((a.text, a['href']))
+            for result in results:
+                link = result.find('a')
+                urls.append(link['href'])
         except Exception as e:
             msg = f'Function `search_anime` exception.\nURL: {url}\nEXCEPTION: {e}\n'
             log(msg)
             print(msg)
 
-        return queryset
-
-    def get_character(self, name):
-        '''
-        Get character data.
-
-        Args:
-            name: Name of the character.
-
-        Returns:
-            Return the Character model data.
-
-        Raises:
-            TypeError: Argument `name` must be string.
-        '''
-        if type(name) != str:
-            raise TypeError('Argument `name` must be string.')
-
-        url = self.search_character(name)[0][1]
-        print(f'Character found: {url}')
-        return Character(url)
+        return list(map(Character, urls))
 
     def get_all_characters(self, start=0, end=10000):
         '''

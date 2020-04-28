@@ -1,7 +1,7 @@
 import unittest
 
 from pymalscraper.scraper import MALScraper
-from pymalscraper.models import Anime
+from pymalscraper.models import Anime, Character
 
 
 class AnimeScraperTest(unittest.TestCase):
@@ -36,3 +36,26 @@ class CharacterScraperTest(unittest.TestCase):
 
     def setUp(self):
         self.scraper = MALScraper()
+
+    def test_character_mitsuha_search_results_are_character_objects(self):
+        results = self.scraper.search_character('mitsuha')
+
+        for result in results:
+            self.assertIsInstance(result, Character)
+
+    def test_search_with_less_than_3_letters_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            self.scraper.search_character('m')
+
+        with self.assertRaises(ValueError):
+            self.scraper.search_character('mi')
+
+    def test_search_with_non_string_value_raises_type_error(self):
+        with self.assertRaises(TypeError):
+            self.scraper.search_character(9)
+
+        with self.assertRaises(TypeError):
+            self.scraper.search_character(["mitsuha"])
+
+        with self.assertRaises(TypeError):
+            self.scraper.search_character(('mitsuha', ))
