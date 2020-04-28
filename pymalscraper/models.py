@@ -247,30 +247,16 @@ class Character:
         return name
 
     @property
-    def alternate_names(self):
-        name = None
-
-        try:
-            div = self._soup.find('div', {'id': 'contentWrapper'}).find('div')
-            h1 = div.find('h1', {'class': 'h1'})
-            name = h1.text
-
-            if '"' in name:
-                name = name.split('"', 2)[1]
-        except Exception as e:
-            print(f'{self.q} alternate_names: {e}')
-
-        return name
-
-    @property
     def details(self):
         details = None
 
         try:
             div = self._soup.find('div', {'id': 'content'}).find(
                 'table').find('td',  {'style': 'padding-left: 5px;', 'valign': 'top'})
-            details = div.text
-            details = details[:details.find('Voice Actors')]
+            # This will give us only the inner text of the current element without
+            #  the child elements' tag and text.
+            details = ''.join(
+                [c for c in div.contents if type(c) == element.NavigableString]).strip()
         except Exception as e:
             print(f'{self.q} details: {e}')
 
@@ -282,7 +268,7 @@ class Character:
 
         try:
             img = self._soup.find('div', {'id': 'content'}).find('img')
-            poster = img['src']
+            poster = img['data-src']
         except Exception as e:
             print(f'{self.q} poster: {e}')
 
@@ -299,11 +285,8 @@ class Character:
                 'td', {'style': 'padding-left: 5px;', 'valign': 'top'}).find(
                 'table').find_all('img')
 
-            for i, img in enumerate(imgs):
-                try:
-                    gallery.append(img['src'])
-                except Exception as e:
-                    print(e)
+            for img in imgs:
+                gallery.append(img['data-src'])
         except Exception as e:
             print(f'{self.q} gallery: {e}')
 
