@@ -21,15 +21,15 @@ class MALScraperTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.scraper.search_anime(101)
 
-    def test_get_all_anime(self):
-        start = 0
-        end = 50
-        anime_list = self.scraper.get_all_anime(start, end)
-        self.assertEqual(len(anime_list), end - start)
+    def test_get_anime_list_from_60_to_90(self):
+        anime_list = self.scraper.get_anime_list(60, 90)
+        self.assertEqual(30, len(anime_list))
+
+    def test_anime_list_are_anime_objects(self):
+        anime_list = self.scraper.get_anime_list(0, 20)
 
         for anime in anime_list:
-            data = anime.get_data()
-            self.assertIsNotNone(data)
+            self.assertEqual(Anime, type(anime))
 
     def test_search_character(self):
         results = self.scraper.search_character('zero two')
