@@ -1,20 +1,18 @@
 from bs4 import BeautifulSoup
+from bs4 import element
 
 from .shortcuts import get, log
 
 
 class Anime:
     def __init__(self, url):
-        self._soup = None
+        res = get(url)
+        self._soup = BeautifulSoup(res.text, features='lxml')
         self.q = url.split('/')[-1]
 
-        try:
-            res = get(url)
-            self._soup = BeautifulSoup(res.text, features='lxml')
-        except Exception as e:
-            msg = f'Anime model exception.\nURL: {url}\nEXCEPTION: {e}\n'
-            log(msg)
-            print(msg)
+        self.content_div = self._soup.find('div', {'id': 'content'})
+        self.sidebar = self.content_div.find(
+            'td', {'class': 'borderClass'}).find('div')
 
     @property
     def title(self):
@@ -23,7 +21,10 @@ class Anime:
         try:
             div = self._soup.find('div', {'id': 'contentWrapper'})
             span = div.find('span', {'itemprop': 'name'})
-            title = span.text
+            # This will give us just the inner text of the element without the
+            # child elements, if there are.
+            title = ''.join(
+                [c for c in span.contents if type(c) == element.NavigableString])
         except Exception as e:
             print(f'{self.q} title: {e}')
 
@@ -92,29 +93,27 @@ class Anime:
 
     @property
     def animetype(self):
-        atype = None
+        anime_type = None
 
         try:
-            divs = self._soup.find(
-                'div', {'class': 'js-scrollfix-bottom'}).find_all('div')
+
+            divs = self.sidebar.find_all('div')
 
             for div in divs:
                 if 'Type:' in div.text:
-                    atype = div.text.replace('Type:', '').rstrip().lstrip()
+                    anime_type = div.find('a').text
                     break
         except Exception as e:
             print(f'{self.q} anime type: {e}')
 
-        return atype
+        return anime_type
 
     @property
     def episodes(self):
         eps = None
 
         try:
-            divs = self._soup.find(
-                'div', {'class': 'js-scrollfix-bottom'}).find_all('div',
-                                                                  {'class': 'spaceit'})
+            divs = self.sidebar.find_all('div')
 
             for div in divs:
                 if 'Episodes:' in div.text:
@@ -130,13 +129,12 @@ class Anime:
         genres = None
 
         try:
-            divs = self._soup.find(
-                'div', {'class': 'js-scrollfix-bottom'}).find_all('div')
+            divs = self.sidebar.find_all('div')
 
             for div in divs:
                 if 'Genres:' in div.text:
-                    genres = div.text.replace('Genres:', '').rstrip().lstrip()
-                    break
+                    links = div.find_all('a')
+                    genres = [a.text for a in links]
         except Exception as e:
             print(f'{self.q} genres: {e}')
 
@@ -147,8 +145,8 @@ class Anime:
         poster = None
 
         try:
-            img = self._soup.find('img', {'class': 'ac'})
-            poster = img['src']
+            img = self.sidebar.find('img')
+            poster = img['data-src']
         except Exception as e:
             print(f'{self.q} poster: {e}')
 
