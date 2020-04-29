@@ -37,6 +37,10 @@ class CharacterScraperTest(unittest.TestCase):
     def setUp(self):
         self.scraper = MALScraper()
 
+    def test_mitsuha_search_results_length_is_5(self):
+        results = self.scraper.search_character('mitsuha')
+        self.assertEqual(len(results), 5)
+
     def test_character_mitsuha_search_results_are_character_objects(self):
         results = self.scraper.search_character('mitsuha')
 
