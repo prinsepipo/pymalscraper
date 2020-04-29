@@ -39,7 +39,7 @@ class MALScraper:
             raise ValueError('Argument `name` must be 3 or more characters.')
 
         url = self.ANIME_SEARCH_URL + name
-        queryset = []
+        urls = []
 
         print(f'Searching anime {name}...')
 
@@ -51,18 +51,18 @@ class MALScraper:
 
             div = soup.find('div', {'id': 'content'}).find(
                 'div', {'class': 'js-categories-seasonal js-block-list list'})
-            table_rows = div.find('table').find_all('tr')[1:6]
+            table_rows = div.find('table').find_all('tr')
 
             for row in table_rows:
                 td = row.find_all('td')[1]
                 a = td.find('a')
-                queryset.append(a['href'])
+                urls.append(a['href'])
         except Exception as e:
             msg = f'Function `search_anime` exception.\nURL: {url}\nEXCEPTION: {e}\n'
             log(msg)
             print(msg)
 
-        return [Anime(url) for url in queryset]
+        return [Anime(url) for url in urls[:5]]
 
     def get_anime_list(self, start=0, end=10000):
         '''
@@ -174,7 +174,7 @@ class MALScraper:
             log(msg)
             print(msg)
 
-        return list(map(Character, urls))
+        return list(map(Character, urls[:5]))
 
     def get_character_list(self, start=0, end=10000):
         '''
