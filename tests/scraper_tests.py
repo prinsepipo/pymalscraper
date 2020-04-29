@@ -59,3 +59,13 @@ class CharacterScraperTest(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             self.scraper.search_character(('mitsuha', ))
+
+    def test_get_character_list_from_20_to_30(self):
+        character_list = self.scraper.get_character_list(20, 30)
+        self.assertEqual(len(character_list), 10)
+
+    def test_get_character_list_contains_character_objects(self):
+        character_list = self.scraper.get_character_list(0, 20)
+
+        for character in character_list:
+            self.assertIsInstance(character, Character)

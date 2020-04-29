@@ -176,7 +176,7 @@ class MALScraper:
 
         return list(map(Character, urls))
 
-    def get_all_characters(self, start=0, end=10000):
+    def get_character_list(self, start=0, end=10000):
         '''
         Scrape all the anime from the website. Scrapes 50 anime from start to
         end.
@@ -190,32 +190,36 @@ class MALScraper:
             Return a list of Anime model data.
 
         Raises:
-            ValueError: Argument `start` must be within 0 to 10000 and less than `end` value.
-            ValueError: Argument `end` must be within 0 to 10000 and greater than `start` value
+            ValueError: Argument `start` must be less than the`end` value.
+            ValueError: Argument `end` must be greater than the `start` value
         '''
         # Constriants.
         if start < 0 or start >= 10000 or start > end:
             raise ValueError(
-                'Argument `start` must be within 0 to 10000 and less than `end` value.')
+                'Argument `start` must be less than the `end` value.')
         if end > 10000 or end <= 0 or end < start:
             raise ValueError(
-                'Argument `end` must be within 0 to 10000 and greater than `start` value.')
+                'Argument `end` must be greater than the `start` value.')
 
-        # Save initial `end` value cause we need this when parsing the total number of animes.
-        upto = end
+        # Since the website paginates by 50, we need to make sure that our
+        # pagination values is a multiple of 50 (either 0, 50, 100, 150, ...).
+        # `page_start` value should be less than `start` value and
+        # `page_end` value should be greater than `end` value. This way we can
+        # return the contents of the list from the specified start and end.
+        if start % 50 == 0:
+            page_start = start
+        else:
+            page_start = start - (start % 50)
+        if end % 50 == 0:
+            page_end = end
+        else:
+            page_end = (end + 50) - (end % 50)
 
-        # `start` and `end` must be divisible by 50 since the website list pagination is also 50.
-        while start % 50 != 0:
-            start += 1
-        while end % 50 != 0:
-            end += 1
+        # Get the url of the all the anime in each page visit.
+        urls = []
 
-        # Get the url of the anime each visit to list page.
-        count = start
-        links = []
-        print(f'Parsing total of {upto - start} characters.')
-        while count <= end - 50:
-            url = self.BASE_URL + '/character.php?limit=' + str(count)
+        while page_start <= page_end:
+            url = self.BASE_URL + '/character.php?limit=' + str(page_start)
             res = get(url)
 
             # Parse the response data.
@@ -229,20 +233,12 @@ class MALScraper:
                 for row in table_rows:
                     a = row.find('td', {'class': 'people'}).find(
                         'div', {'class': 'information di-ib mt24'}).find('a')
-                    links.append(a['href'])
+                    urls.append(a['href'])
             except Exception as e:
                 msg = f'Function `get_all_characters` exception.\nURL: {url}\nEXCEPTION: {e}\n'
                 log(msg)
                 print(msg)
 
-            count += 50
+            page_start += 50
 
-        characters = []
-        for i, url in enumerate(links[:upto]):
-            characters.append(Character(url))
-
-            s = f'Scraping Character {i + 1} / {upto}: {url.split("/")[-1]}'
-            printd(s)
-
-        print()
-        return characters
+        return list(map(Character, urls[start:end]))
