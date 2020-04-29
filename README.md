@@ -4,25 +4,29 @@ Scrapes data from https://myanimelist.net/.
 
 ## Anime Model
 
-- Title
-- English Title
-- Japanese Title
-- Synonyms
-- Synopsis
-- Anime Type
-- Episodes
-- Genres
-- Poster
-- Trailer
+| Data           |   Attribute    | Description                                            |
+| -------------- | :------------: | ------------------------------------------------------ |
+| Title          |     title      | Main title in english characters.                      |
+| English Title  | english_title  | English translation of the main title.                 |
+| Japanese Title | japanese_title | Main title in japanese characters.                     |
+| Synonyms       |    synonyms    | Other titles of the anime.                             |
+| Synopsis       |    synopsis    | Synopsis / summary of the anime.                       |
+| Anime Type     |   animetype    | Type of the anime.                                     |
+| Episodes       |    episodes    | Number of episodes.                                    |
+| Genres         |     genres     | Genres of the anime.                                   |
+| Poster         |     poster     | Cover image of the anime.                              |
+| Trailer        |    trailer     | Trailer of the anime.                                  |
+| Data           |   get_data()   | Function that returns all of the data as a dictionary. |
 
 ## Character Model
 
-- Name (English)
-- Japanese Name
-- Alternate Names
-- Details
-- Poster
-- Gallery
+| Data          |   Attribute   | Description                                                  |
+| ------------- | :-----------: | ------------------------------------------------------------ |
+| Name          |     name      | Name in english characters.                                  |
+| Japanese Name | japanese_name | Name in japanese characters.                                 |
+| Details       |    details    | About the character.                                         |
+| Poster        |    poster     | Image of the character.                                      |
+| Gallery       | get_gallery() | Function that scrapes the all the pictures of the character. |
 
 ## Installation
 
@@ -33,46 +37,49 @@ pip install pymalscraper
 ## Basic Usage
 
 ```python
-from pymalscraper.scraper import Scraper
-scraper = Scraper()
-
-# Scraping Anime
-anime = scraper.get_anime("kimi no na wa.")
-
-> anime.title
-'Kimi no na wa.'
-> anime.english_title
-'Your Name.'
-> anime.japanese_title
-'君の名は。'
-> anime.synonyms
-''
-> anime.synopsis
-"Mitsuha Miyamizu, a high school girl, yearns to live the life of a boy in the bustling city of Tokyo—a dream that stands in stark contrast to her present life in the countryside. Meanwhile in the city, Taki Tachibana lives a busy life as a high school student while juggling his part-time job and hopes for a future in architecture.\n\r\nOne day, Mitsuha awakens in a room that is not her own and suddenly finds herself living the dream life in Tokyo—but in Taki's body! Elsewhere, Taki finds himself living Mitsuha's life in the humble countryside. In pursuit of an answer to this strange phenomenon, they begin to search for one another.\n\nKimi no Na wa. revolves around Mitsuha and Taki's actions, which begin to have a dramatic impact on each other's lives, weaving them into a fabric held together by fate and circumstance.\n\r\n[Written by MAL Rewrite]"
-> anime.animetype
-'Movie'
-> anime.episodes
-'1'
-> anime.genres
-'Romance, Supernatural, School, Drama'
-> anime.poster
-'https://cdn.myanimelist.net/images/anime/5/87048.jpg'
-> anime.trailer
-'https://www.youtube.com/embed/3KR8_igDs1Y?enablejsapi=1&wmode=opaque&autoplay=1'
-
-# To get the full data. By default, this returns json.
-> anime.get_data()
-{'title': 'Kimi no Na wa.', 'english_title': 'Your Name.', 'japanese_title': '君の名は。', 'synonyms': None, 'synopsis': "Mitsuha Miyamizu, a high school girl, yearns to live the life of a boy in the bustling city of Tokyo—a dream that stands in stark contrast to her present life in the countryside. Meanwhile in the city, Taki Tachibana lives a busy life as a high school student while juggling his part-time job and hopes for a future in architecture.\n\r\nOne day, Mitsuha awakens in a room that is not her own and suddenly finds herself living the dream life in Tokyo—but in Taki's body! Elsewhere, Taki finds himself living Mitsuha's life in the humble countryside. In pursuit of an answer to this strange phenomenon, they begin to search for one another.\n\nKimi no Na wa. revolves around Mitsuha and Taki's actions, which begin to have a dramatic impact on each other's lives, weaving them into a fabric held together by fate and circumstance.\n\r\n[Written by MAL Rewrite]", 'type': 'Movie', 'episodes': '1', 'genres': 'Romance, Supernatural, School, Drama', 'poster': 'https://cdn.myanimelist.net/images/anime/5/87048.jpg', 'trailer': 'https://www.youtube.com/embed/3KR8_igDs1Y?enablejsapi=1&wmode=opaque&autoplay=1'}
-
-
-
-# Scraping Character
-char = scraper.get_character('mitsuha')
-
-> char.name
-'Mitsuha  (蜜羽)'
-> char.poster
-'https://cdn.myanimelist.net/images/characters/13/126193.jpg'
-> char.get_gallery()
-['https://cdn.myanimelist.net/images/characters/13/126191.jpg', 'https://cdn.myanimelist.net/images/characters/13/126193.jpg']
+from pymalscraper.scraper import MALScraper
+scraper = MALScraper()
 ```
+
+**Scraping Anime**
+
+```python
+results = scraper.search_anime("kimi no na wa.")
+```
+
+Will return a list of `Anime` instances
+
+```
+[ models.Anime<Kimi no Na wa.>,
+models.Anime<Suntory Minami Alps no Tennensui>,
+models.Anime<Kimi ni Todoke>,
+models.Anime<Kimi ni Todoke 2nd Season>,
+models.Anime<Kimi to Boku. 2> ]
+```
+
+**Scraping Character**
+
+```python
+results = scraper.search_character("mitsuha")
+```
+
+Will return a list of `Character` objects
+
+```
+[ models.Anime<Mitsuha>,
+models.Anime<Mitsuha Miyamizu>,
+models.Anime<Mitsuharu Moriya>,
+models.Anime<Mother Mitsuhashi>,
+models.Anime<Akari Mitsuhashi> ]
+```
+
+**To know more about the objects / instances, refer to the model section above.**
+
+There is also a method in the scraper that scrapes the top list of either anime / characters.
+
+```python
+anime_list = scraper.get_anime_list(0, 50)
+character_list = scraper.get_character_list(0, 50)
+```
+
+You just need to specify where to start (1st arg) and end (2nd arg) in the list.
