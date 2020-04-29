@@ -8,8 +8,9 @@ class AnimeScraperTest(unittest.TestCase):
     def setUp(self):
         self.scraper = MALScraper()
 
-    def test_search_anime_kimi_no_na_wa(self):
+    def test_search_anime_kimi_no_na_wa_has_a_list_of_5_anime_instances(self):
         results = self.scraper.search_anime('kimi no na wa')
+        self.assertEqual(len(results), 5)
 
         for result in results:
             self.assertTrue(type(result), Anime)

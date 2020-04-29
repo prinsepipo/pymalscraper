@@ -51,12 +51,13 @@ class MALScraper:
 
             div = soup.find('div', {'id': 'content'}).find(
                 'div', {'class': 'js-categories-seasonal js-block-list list'})
-            table_rows = div.find('table').find_all('tr')
 
-            for row in table_rows:
-                td = row.find_all('td')[1]
-                a = td.find('a')
-                urls.append(a['href'])
+            # First `tr` in the website is not part of the results.
+            results = div.find('table').find_all('tr')[1:]
+
+            for result in results:
+                link = result.find('td').find('a')
+                urls.append(link['href'])
         except Exception as e:
             msg = f'Function `search_anime` exception.\nURL: {url}\nEXCEPTION: {e}\n'
             log(msg)
