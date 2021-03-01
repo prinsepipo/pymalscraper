@@ -6,6 +6,7 @@
 .idea
 
 # Compiled python modules.
+__pycache__/
 *.pyc
 
 
